@@ -61,9 +61,7 @@ setup(
         # eg: "keyword1", "keyword2", "keyword3",
     ],
     python_requires='>=3.7',
-    install_requires=[
-        # eg: "aspectlib==1.1.1", "six>=1.7",
-    ],
+    install_requires=['numpy', 'numpy-financial', 'mpmath', 'jsons', 'forex_python', 'pint'],
     extras_require={
         # eg:
         #   "rst": ["docutils>=0.11"],
