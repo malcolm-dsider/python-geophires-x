@@ -34,9 +34,9 @@ Overview
     :alt: Supported implementations
     :target: https://pypi.org/project/geophires-x
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/softwareengineerprogrammer/python-geophires-x/v0.0.1.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/softwareengineerprogrammer/python-geophires-x/v0.0.2.svg
     :alt: Commits since latest release
-    :target: https://github.com/softwareengineerprogrammer/python-geophires-x/compare/v0.0.1...main
+    :target: https://github.com/softwareengineerprogrammer/python-geophires-x/compare/v0.0.2...main
 
 
 
