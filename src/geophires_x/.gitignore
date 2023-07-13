@@ -60,7 +60,6 @@ htmlcov/
 .ideas/
 .idea/
 _build/
-*.py
 *.sln
 
 #MIR my Files
