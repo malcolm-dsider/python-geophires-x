@@ -13,16 +13,16 @@ def read_input_file(model, ReturnDict1):
         try:
             if exists(fname):
                 content = []
-                model.logger.info("Found filename: " + fname + " Proceeding with run using input parameters from that file")
+                model.logger.info(f'Found filename: {fname}. Proceeding with run using input parameters from that file')
                 with open(fname, encoding='UTF-8') as f:
                     content = f.readlines()    #store all input in one long strong that will be passed to all objects so they can parse out their specific parameters (and ignore the rest)
             else:
-                model.logger.warn("File: "+  fname + "  not found - proceeding with default parameter run...")
+                model.logger.warn(f'File: {fname} not found - proceeding with default parameter run...')
                 return
 
         except BaseException as ex:
-            print (ex)
-            model.logger.error("Error " + str(ex) + "using filename:" + fname + " proceeding with default parameter run...")
+            print(ex)
+            model.logger.error(f'Error {ex} using filename: {fname}, proceeding with default parameter run...')
             return
 
         #successful read of data into list.  Now make a dictionary with all the parameter entries.  Index will be the unique name of the parameter.  The value with be a "ParameterEntry" structure, with name, value (optionally with units), optional comment
