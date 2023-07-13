@@ -25,7 +25,7 @@ setup(
     url='https://github.com/softwareengineerprogrammer/python-geophires-x',
     packages=find_packages('src'),
     package_dir={'': 'src'},
-    py_modules=[path.stem for path in Path('src/geophires_x').glob('*.py')],
+    py_modules=[path.stem for path in Path('src').glob('*.py')],
     include_package_data=True,
     zip_safe=False,
     classifiers=[
@@ -61,7 +61,7 @@ setup(
         # eg: "keyword1", "keyword2", "keyword3",
     ],
     python_requires='>=3.7',
-    install_requires=['numpy', 'numpy-financial', 'mpmath', 'jsons', 'forex_python', 'pint'],
+    install_requires=['numpy', 'numpy-financial', 'pint', 'forex_python', 'jsons', 'mpmath', 'deepdiff', 'mysql.connector'],
     extras_require={
         # eg:
         #   "rst": ["docutils>=0.11"],
