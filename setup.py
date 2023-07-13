@@ -25,7 +25,7 @@ setup(
     url='https://github.com/softwareengineerprogrammer/python-geophires-x',
     packages=find_packages('src'),
     package_dir={'': 'src'},
-    py_modules=[path.stem for path in Path('src').glob('*.py')],
+    py_modules=[path.stem for path in Path('src/geophires_x').glob('*.py')],
     include_package_data=True,
     zip_safe=False,
     classifiers=[
