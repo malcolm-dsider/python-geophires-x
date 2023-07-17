@@ -24,7 +24,7 @@ import numpy as np
 
 def main():
     #set up logging.
-    logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
+    logging.config.fileConfig('logging.conf')
     logger = logging.getLogger('root')
     logger.info("Init " + str(__name__))
 
@@ -42,8 +42,6 @@ def main():
 
     #write the outputs, if requested
     model.outputs.PrintOutputs(model)
-    model.addoutputs.PrintOutputs(model)
-    model.ccusoutputs.PrintOutputs(model)
         
     #if the user has asked for it, copy the output file to the screen
     if model.outputs.printoutput:

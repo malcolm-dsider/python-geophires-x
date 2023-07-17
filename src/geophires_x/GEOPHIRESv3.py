@@ -14,16 +14,16 @@ import os
 import sys
 import logging
 import logging.config
-import geophires_x.Model as Model
+import Model
 
 def main():
-    # set the starting directory to be the directory that this file is in
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
-    # set up logging.
-    logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
+    #set up logging.
+    logging.config.fileConfig('logging.conf')
     logger = logging.getLogger('root')
     logger.info("Init " + str(__name__))
+
+    #set the starting directory to be the directory that this file is in
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
     #initiate the entire model
     model = Model.Model()
@@ -36,7 +36,7 @@ def main():
 
     #write the outputs, if requested
     model.outputs.PrintOutputs(model)
-
+        
     #if the user has asked for it, copy the output file to the screen
     if model.outputs.printoutput:
         outputfile = "HDR.out"
@@ -46,7 +46,7 @@ def main():
 
             #Now write each line to the screen
             for line in content: sys.stdout.write(line)
-
+    
     logger.info("Complete "+ str(__name__) + ": " + sys._getframe().f_code.co_name)
 
 if __name__ == "__main__":
