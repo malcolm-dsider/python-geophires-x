@@ -1,5 +1,4 @@
 import re
-from pathlib import Path
 from types import MappingProxyType
 
 from common import log
@@ -107,7 +106,7 @@ class GeophiresXResult:
     def __init__(self, output_file_path):
         self.output_file_path = output_file_path
 
-        f = Path.open(self.output_file_path)
+        f = open(self.output_file_path)
         self._lines = list(f.readlines())
         f.close()
 
