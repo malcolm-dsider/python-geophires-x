@@ -3,10 +3,10 @@ import os
 import numpy as np
 #from mpmath import *
 #from OptionList import ReservoirModel, FractureShape, ReservoirVolume
-from Parameter import intParameter, floatParameter, strParameter, listParameter, OutputParameter, ReadParameter
-from Units import *
-import Model
-from Reservoir import Reservoir
+from .Parameter import intParameter, floatParameter, strParameter, listParameter, OutputParameter, ReadParameter
+from .Units import *
+import geophires_x.Model as Model
+from .Reservoir import Reservoir
 
 class TOUGH2Reservoir(Reservoir):
     """
@@ -14,9 +14,9 @@ class TOUGH2Reservoir(Reservoir):
     """
     def __init__(self, model:Model):
         """
-        The __init__ function is called automatically when a class is instantiated. 
-        It initializes the attributes of an object, and sets default values for certain arguments that can be overridden by user input. 
-        
+        The __init__ function is called automatically when a class is instantiated.
+        It initializes the attributes of an object, and sets default values for certain arguments that can be overridden by user input.
+
         :param self: Store data that will be used by the class
         :param model: The container class of the application, giving access to everything else, including the logger
         :return: None
@@ -26,7 +26,7 @@ class TOUGH2Reservoir(Reservoir):
         super().__init__(model)   # initialize the parent parameters and variables
         sclass = str(__class__).replace("<class \'", "")
         self.MyClass = sclass.replace("\'>","")
-        
+
         #Set up all the Parameters that will be predefined by this class using the different types of parameter classes.  Setting up includes giving it a name, a default value, The Unit Type (length, volume, temperature, etc) and Unit Name of that value, sets it as required (or not), sets allowable range, the error message if that range is exceeded, the ToolTip Text, and the name of teh class that created it.
         #This includes setting up temporary variables that will be available to all the class but noy read in by user, or used for Output
         #This also includes all Parameters that are calculated and then published using the Printouts function.
@@ -36,16 +36,16 @@ class TOUGH2Reservoir(Reservoir):
         self.reswidth = self.ParameterDict[self.reswidth.Name] = floatParameter("Reservoir Width", value = 500.0, Min=10, Max=10000, UnitType = Units.LENGTH, PreferredUnits = LengthUnit.METERS, CurrentUnits = LengthUnit.METERS, ErrMessage = "assume default reservoir width (500 m)", ToolTipText="Reservoir width for built-in TOUGH2 doublet reservoir model")
 
         model.logger.info("Complete " + str(__class__) + ": " + sys._getframe().f_code.co_name)
- 
+
     def __str__(self):
         return "TOUGH2Reservoir"
 
     def read_parameters(self, model:Model) -> None:
         """
-        The read_parameters function reads in the parameters from a dictionary created by reading the user-provided file and updates the parameter values for this object. 
-        
+        The read_parameters function reads in the parameters from a dictionary created by reading the user-provided file and updates the parameter values for this object.
+
         The function reads in all of the parameters that relate to this object, including those that are inherited from other objects. It then updates any of these parameter values that have been changed by the user.  It also handles any special cases.
-        
+
         :param self: Reference the class instance (such as it is) from within the class
         :param model: The container class of the application, giving access to everything else, including the logger
         :return: None
@@ -55,7 +55,7 @@ class TOUGH2Reservoir(Reservoir):
         super().read_parameters(model)    #read the paremeters for the parent.
          #if we call super, we don't need to deal with setting the parameters here, just deal with the special cases for the variables in this class
         #because the call to the super.readparameters will set all the variables, including the ones that are specific to this class
-       
+
         #Deal with all the parameter values that the user has provided.  They should really only provide values that they want to change from the default values, but they can provide a value that is already set because it is a defaulr value set in __init__.  It will ignore those
         #This also deals with all the special cases that need to be talen care of after a vlaue has been read in and checked.
         #If you choose to sublass this master class, you can also choose to override this method (or not), and if you do, do it before or after you call you own version of this method.  If you do, you can also choose to call this method from you class, which can effectively modify all these superclass parameters in your class.
@@ -101,7 +101,7 @@ class TOUGH2Reservoir(Reservoir):
             DeltaYgrid = reservoirwidth/11
             DeltaZgrid = reservoirthickness/5
             flowrate = model.wellbores.prodwellflowrate.value
-        
+
             #convert injection temperature to injection enthalpy
             arraytinj = np.array([1.8,    11.4,  23.4,  35.4,  47.4,  59.4,  71.3,  83.3,  95.2, 107.1, 118.9])
             arrayhinj = np.array([1.0E4, 5.0E4, 1.0E5, 1.5E5, 2.0E5, 2.5E5, 3.0E5, 3.5E5, 4.0E5, 4.5E5, 5.0E5])
@@ -150,28 +150,28 @@ class TOUGH2Reservoir(Reservoir):
             f.write('A36 2  012\n')
             f.write('A3616  021\n')
             f.write('\n')
-            f.write('ENDCY\n')    
+            f.write('ENDCY\n')
             f.close()
             print("GEOPHIRES will run TOUGH2 simulation with built-in Doublet model ...")
-    
+
         else:
             infile = model.reserv.tough2modelfilename.value
             outfile = str('tough2output.out')
-            print("GEOPHIRES will run TOUGH2 simulation with user-provided input file = "+model.reserv.tough2modelfilename.value+" ...") 
+            print("GEOPHIRES will run TOUGH2 simulation with user-provided input file = "+model.reserv.tough2modelfilename.value+" ...")
 
-        # run TOUGH2 executable            
+        # run TOUGH2 executable
         try:
             os.system('%s < %s > %s' % (path_to_exe, infile, outfile))
         except:
-            print("Error: GEOPHIRES could not run TOUGH2 and will abort simulation.")        
+            print("Error: GEOPHIRES could not run TOUGH2 and will abort simulation.")
             sys.exit()
 
         # read output temperature and pressure
-        try:    
-            fname = 'FOFT'    
+        try:
+            fname = 'FOFT'
             with open(fname, encoding='UTF-8') as f:
-                content = f.readlines()  
-    
+                content = f.readlines()
+
             NumerOfResults = len(content)
             SimTimes = np.zeros(NumerOfResults)
             ProdPressure = np.zeros(NumerOfResults)
@@ -180,8 +180,8 @@ class TOUGH2Reservoir(Reservoir):
                 SimTimes[i] = float(content[i].split(',')[1].strip('\n'))
                 ProdPressure[i] = float(content[i].split(',')[8].strip('\n'))
                 ProdTemperature[i] = float(content[i].split(',')[9].strip('\n'))
-        
-            #print(ProdTemperature)    
+
+            #print(ProdTemperature)
             model.reserv.Tresoutput.value = np.interp(model.reserv.timevector.value*365*24*3600,SimTimes,ProdTemperature)
         except:
             print("Error: GEOPHIRES could not import production temperature and pressure from TOUGH2 output file ("+infile+") and will abort simulation.")

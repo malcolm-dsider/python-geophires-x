@@ -9,9 +9,9 @@ from datetime import datetime
 import json
 import jsons
 from mysql.connector import connect, Error
-from Parameter import Parameter, intParameter, boolParameter, floatParameter, strParameter, listParameter, OutputParameter, ReadParameter
+from .Parameter import Parameter, intParameter, boolParameter, floatParameter, strParameter, listParameter, OutputParameter, ReadParameter
 from enum import Enum
-from OptionList import ReservoirModel, FractureShape, ReservoirVolume, EndUseOptions, PowerPlantType, EconomicModel, WellDrillingCostCorrelation
+from .OptionList import ReservoirModel, FractureShape, ReservoirVolume, EndUseOptions, PowerPlantType, EconomicModel, WellDrillingCostCorrelation
 
 from cryptography.fernet import Fernet
 import zlib
@@ -42,7 +42,7 @@ class AdvGeoPHIRESUtils():
                 connection.commit()
                 for result in obj.stored_results():
                     details = result.fetchall()
-                    warnings = result.fetchwarnings() 
+                    warnings = result.fetchwarnings()
                 obj.close()
                 connection.close()
             except connection.Error as err:
@@ -52,9 +52,9 @@ class AdvGeoPHIRESUtils():
     def DumpObjectAsJson(self, MyObject)->str:
         """
         The DumpObjectAsJson function accepts a Python object and returns a JSON string representation of that object.
-        The function is useful for debugging purposes, as it allows you to dump an object's contents to the console in 
+        The function is useful for debugging purposes, as it allows you to dump an object's contents to the console in
         a human-readable format.
-    
+
         :param MyObject: Pass in the object that you want to convert into a json string
         :return: A string of the object in json format
         :doc-author: Malcolm Ross
@@ -65,10 +65,10 @@ class AdvGeoPHIRESUtils():
     def  ReadParameterFromJson(self, dJson:dict):
         """
         The ReadParameterFromJson function reads a JSON string and updates the parameters of this class accordingly.
-            
-        Args: 
-            dJson (dictionary): dictionary derived from encoding a JSON string. 
-    
+
+        Args:
+            dJson (dictionary): dictionary derived from encoding a JSON string.
+
         :param self: Reference the class object itself
         :param dJson:dict: Pass the dictionary that is derived from encoding a json string to the function
         :return: The value of the parameter that is passed in
@@ -113,7 +113,7 @@ class AdvGeoPHIRESUtils():
             for item in dJson.items():
                 PEntry = Parameter.ParameterEntry(item[0], str(item[1]['Value']), item[1]['Comment'])
                 ReturnDict1[item[0]] = PEntry     #make the dictionary element with the key set to lowercase without spaces.  This should help the algorithm br more forgiving about finding thingsin the dictionary
-    
+
         model.logger.info("Complete "+ str(__name__) + ": " + sys._getframe().f_code.co_name)
 
     def CheckForExistingResult(self, model, object)->str:
@@ -153,7 +153,7 @@ class AdvGeoPHIRESUtils():
         #handle encrption stuff
         key = ""
         if exists("key.key"): key = load_key() # Loads the key and stores it in a variable
-        else: 
+        else:
             write_key() # Writes the key to the key file
             key = load_key() # Loads the key and stores it in a variable
         f = Fernet(key)
@@ -186,7 +186,7 @@ class AdvGeoPHIRESUtils():
             print (ex)
             model.logger.error("Error " + str(ex) + "writing into the database with the result. Proceeding as if we did.")
             return None
-        
+
         model.logger.info("Complete "+ str(__name__) + ": " + sys._getframe().f_code.co_name)
         return KeyAsHash
 
@@ -272,21 +272,21 @@ class AdvGeoPHIRESUtils():
                 model.wellbores.ParameterDict[model.wellbores.maxdrawdown.Name] = self.PopulateStructureFromDictEntry(model.wellbores.maxdrawdown, dd["maxdrawdown"])
 
                 #Results - used by other objects or printed in output downstream
-                
+
                 model.wellbores.OutputParameterDict[model.wellbores.Phydrostaticcalc.Name] = self.PopulateStructureFromDictEntry(model.wellbores.Phydrostaticcalc, dd["Phydrostaticcalc"])
                 model.wellbores.OutputParameterDict[model.wellbores.redrill.Name] = self.PopulateStructureFromDictEntry(model.wellbores.redrill, dd["redrill"])
-                model.wellbores.OutputParameterDict[model.wellbores.PumpingPowerProd.Name] = self.PopulateStructureFromDictEntry(model.wellbores.PumpingPowerProd, dd["PumpingPowerProd"]) 
-                model.wellbores.OutputParameterDict[model.wellbores.PumpingPowerInj.Name] = self.PopulateStructureFromDictEntry(model.wellbores.PumpingPowerInj, dd["PumpingPowerInj"]) 
-                model.wellbores.OutputParameterDict[model.wellbores.pumpdepth.Name] = self.PopulateStructureFromDictEntry(model.wellbores.pumpdepth, dd["pumpdepth"]) 
+                model.wellbores.OutputParameterDict[model.wellbores.PumpingPowerProd.Name] = self.PopulateStructureFromDictEntry(model.wellbores.PumpingPowerProd, dd["PumpingPowerProd"])
+                model.wellbores.OutputParameterDict[model.wellbores.PumpingPowerInj.Name] = self.PopulateStructureFromDictEntry(model.wellbores.PumpingPowerInj, dd["PumpingPowerInj"])
+                model.wellbores.OutputParameterDict[model.wellbores.pumpdepth.Name] = self.PopulateStructureFromDictEntry(model.wellbores.pumpdepth, dd["pumpdepth"])
                 model.wellbores.OutputParameterDict[model.wellbores.impedancemodelallowed.Name] = self.PopulateStructureFromDictEntry(model.wellbores.impedancemodelallowed, dd["impedancemodelallowed"])
                 model.wellbores.OutputParameterDict[model.wellbores.productionwellpumping.Name] = self.PopulateStructureFromDictEntry(model.wellbores.productionwellpumping, dd["productionwellpumping"])
                 model.wellbores.OutputParameterDict[model.wellbores.impedancemodelused.Name] = self.PopulateStructureFromDictEntry(model.wellbores.impedancemodelused, dd["impedancemodelused"])
                 model.wellbores.OutputParameterDict[model.wellbores.ProdTempDrop.Name] = self.PopulateStructureFromDictEntry(model.wellbores.ProdTempDrop, dd["ProdTempDrop"])
-                model.wellbores.OutputParameterDict[model.wellbores.DPOverall.Name] = self.PopulateStructureFromDictEntry(model.wellbores.DPOverall, dd["DPOverall"]) 
+                model.wellbores.OutputParameterDict[model.wellbores.DPOverall.Name] = self.PopulateStructureFromDictEntry(model.wellbores.DPOverall, dd["DPOverall"])
                 model.wellbores.OutputParameterDict[model.wellbores.DPInjWell.Name] = self.PopulateStructureFromDictEntry(model.wellbores.DPInjWell, dd["DPInjWell"])
                 model.wellbores.OutputParameterDict[model.wellbores.DPReserv.Name] = self.PopulateStructureFromDictEntry(model.wellbores.DPReserv, dd["DPReserv"])
                 model.wellbores.OutputParameterDict[model.wellbores.DPProdWell.Name] = self.PopulateStructureFromDictEntry(model.wellbores.DPProdWell, dd["DPProdWell"])
-                model.wellbores.OutputParameterDict[model.wellbores.DPBouyancy.Name] = self.PopulateStructureFromDictEntry(model.wellbores.DPBouyancy, dd["DPBouyancy"]) 
+                model.wellbores.OutputParameterDict[model.wellbores.DPBouyancy.Name] = self.PopulateStructureFromDictEntry(model.wellbores.DPBouyancy, dd["DPBouyancy"])
                 model.wellbores.OutputParameterDict[model.wellbores.ProducedTemperature.Name] = self.PopulateStructureFromDictEntry(model.wellbores.ProducedTemperature, dd["ProducedTemperature"])
                 model.wellbores.OutputParameterDict[model.wellbores.PumpingPower.Name] = self.PopulateStructureFromDictEntry(model.wellbores.PumpingPower, dd["PumpingPower"])
                 model.wellbores.OutputParameterDict[model.wellbores.Pprodwellhead.Name] = self.PopulateStructureFromDictEntry(model.wellbores.Pprodwellhead, dd["Pprodwellhead"])
@@ -321,7 +321,7 @@ class AdvGeoPHIRESUtils():
                 model.surfaceplant.OutputParameterDict[model.surfaceplant.HeatProduced.Name] = self.PopulateStructureFromDictEntry(model.surfaceplant.HeatProduced, dd["HeatProduced"])
                 model.surfaceplant.OutputParameterDict[model.surfaceplant.Availability.Name] = self.PopulateStructureFromDictEntry(model.surfaceplant.Availability, dd["Availability"])
                 model.surfaceplant.OutputParameterDict[model.surfaceplant.RemainingReservoirHeatContent.Name] = self.PopulateStructureFromDictEntry(model.surfaceplant.RemainingReservoirHeatContent, dd["RemainingReservoirHeatContent"])
-                
+
             elif "<class 'Economics.Economics'>" in sclass:
                 model.economics.ParameterDict[model.economics.econmodel.Name] = self.PopulateStructureFromDictEntry(model.economics.econmodel, dd["econmodel"])
                 model.economics.ParameterDict[model.economics.ccstimfixed.Name] = self.PopulateStructureFromDictEntry(model.economics.ccstimfixed, dd["ccstimfixed"])
@@ -549,7 +549,7 @@ class AdvGeoPHIRESUtils():
         key = self.CheckForExistingResult(model, object)   #This will rehydrate the object if it is found
         if key == None:
             object.Calculate(model)    #run calculation because there was nothing in the database
-            
+
             #store the calculated result and associated object parameters in the database
             resultkey = self.store_result(model, object)
             if resultkey == None:

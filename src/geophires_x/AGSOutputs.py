@@ -2,18 +2,18 @@ import datetime
 import time
 import sys
 import numpy as np
-from Parameter import ConvertUnitsBack, ConvertOutputUnits, LookupUnits
-from OptionList import EndUseOptions, EconomicModel, ReservoirModel, FractureShape, ReservoirVolume
-from Units import *
-import AdvModel
-import Outputs
+from .Parameter import ConvertUnitsBack, ConvertOutputUnits, LookupUnits
+from .OptionList import EndUseOptions, EconomicModel, ReservoirModel, FractureShape, ReservoirVolume
+from .Units import *
+import geophires_x.AdvModel as AdvModel
+import geophires_x.Outputs as Outputs
 import numpy as np
 NL="\n"
 
 class AGSOutputs(Outputs.Outputs):
     """description of class"""
     def PrintOutputs(self, model:AdvModel):
-        model.logger.info("Init " + str(__class__) + ": " + sys._getframe().f_code.co_name)    
+        model.logger.info("Init " + str(__class__) + ": " + sys._getframe().f_code.co_name)
         #Deal with converting Units back to PreferredUnits, if required.
         #before we write the outputs, we go thru all the parameters for all of the objects and set the values back to the units that the user entered the data in
         #We do this because the value may be displayed in the output, and we want the user to recginze their value, not some converted value
@@ -25,7 +25,7 @@ class AGSOutputs(Outputs.Outputs):
         #now we need to loop thru all thw output parameters to update their units to whatever units the user has specified.
         #i.e., they may have specified that all LENGTH results must be in feet, so we need to convert those from whatver LENGTH unit they are to feet.
         #same for all the other classes of units (TEMPERATURE, DENSITY, etc).
-        
+
         for obj in [model.reserv, model.wellbores, model.surfaceplant, model.economics]:
             for key in obj.OutputParameterDict:
                 if key in self.ParameterDict:
@@ -54,7 +54,7 @@ class AGSOutputs(Outputs.Outputs):
             else:
                 outputfile = "HDR.out"
                 if len(sys.argv) > 2: outputfile = sys.argv[2]
-                with open(outputfile,'w', encoding='UTF-8') as f: 
+                with open(outputfile,'w', encoding='UTF-8') as f:
                     f.write('                               *****************\n')
                     f.write('                               ***CASE REPORT***\n')
                     f.write('                               *****************\n')
@@ -75,7 +75,7 @@ class AGSOutputs(Outputs.Outputs):
                     f.write('      End-Use: ' + str(model.surfaceplant.End_use.value) + NL)
                     f.write('      Fluid: ' + str(model.wellbores.Fluid.value.value) + NL)
                     f.write('      Design: ' + str(model.wellbores.Configuration.value.value) + NL)
-            
+
                     #Print conditions
                     f.write(f"      Flow rate:                                             " + "{0:.1f}".format((model.wellbores.prodwellflowrate.value)) + " " + model.wellbores.prodwellflowrate.CurrentUnits.value + NL)
                     f.write("      Lateral Length:                                      " + str(round(model.wellbores.Nonvertical_length.value)) + " " + model.wellbores.Nonvertical_length.CurrentUnits.value + NL)
@@ -106,7 +106,7 @@ class AGSOutputs(Outputs.Outputs):
                     if model.surfaceplant.End_use ==EndUseOptions.HEAT: f.write(f"      LCOH:                                                 " + "{0:.1f}".format((model.economics.LCOH.value)) +" "+ model.economics.LCOH.CurrentUnits.value + NL)
                     else: f.write(f"      LCOE:                                                 " + "{0:.1f}".format((model.economics.LCOE.value)) +" " + model.economics.LCOE.CurrentUnits.value + NL)
 
-                    
+
                     f.write(NL)
                     f.write('                                        ******************************\n')
                     f.write('                                        *  POWER GENERATION PROFILE  *\n')
@@ -116,8 +116,8 @@ class AGSOutputs(Outputs.Outputs):
                         f.write('             DRAWDOWN             TEMPERATURE             POWER             POWER              EFFICIENCY\n')
                         f.write("                                     (" + model.wellbores.ProducedTemperature.CurrentUnits.value+")               (" + model.wellbores.PumpingPower.CurrentUnits.value + ")              (" + model.surfaceplant.NetElectricityProduced.CurrentUnits.value + ")                  (%)\n")
                         for i in range(0, model.surfaceplant.plantlifetime.value):
-                            f.write('  {0:2.0f}         {1:8.4f}              {2:8.2f}             {3:8.4f}          {4:8.4f}              {5:8.4f}'.format(i+1, 
-                                                    model.wellbores.ProducedTemperature.value[i*model.economics.timestepsperyear.value]/model.wellbores.ProducedTemperature.value[0], 
+                            f.write('  {0:2.0f}         {1:8.4f}              {2:8.2f}             {3:8.4f}          {4:8.4f}              {5:8.4f}'.format(i+1,
+                                                    model.wellbores.ProducedTemperature.value[i*model.economics.timestepsperyear.value]/model.wellbores.ProducedTemperature.value[0],
                                                                             model.wellbores.ProducedTemperature.value[i],
                                                                                                             model.wellbores.PumpingPower.value[i],
                                                                                                                                 model.surfaceplant.NetElectricityProduced.value[i],
@@ -143,8 +143,8 @@ class AGSOutputs(Outputs.Outputs):
                         f.write('                   (GWh/year)                  (GWh/year)            (10^15 J)                 (%)\n')
                         for i in range(0, model.surfaceplant.plantlifetime.value):
                             f.write('  {0:2.0f}              {1:8.1f}                    {2:8.1f}              {3:8.2f}               {4:8.2f}'.format(i+1,
-                                                    model.surfaceplant.NetkWhProduced.value[i]/1E6, 
-                                                                                model.surfaceplant.HeatkWhExtracted.value[i]/1E6, 
+                                                    model.surfaceplant.NetkWhProduced.value[i]/1E6,
+                                                                                model.surfaceplant.HeatkWhExtracted.value[i]/1E6,
                                                                                                         model.surfaceplant.RemainingReservoirHeatContent.value[i],
                                                                                                                                 (model.reserv.InitialReservoirHeatContent.value-model.surfaceplant.RemainingReservoirHeatContent.value[i])*100/model.reserv.InitialReservoirHeatContent.value)+NL)
                     elif model.surfaceplant.enduseoption.value == EndUseOptions.HEAT: #only direct-use
@@ -158,7 +158,7 @@ class AGSOutputs(Outputs.Outputs):
                                                                                 model.surfaceplant.HeatkWhExtracted.value[i]/1E6,
                                                                                                         model.surfaceplant.RemainingReservoirHeatContent.value[i],
                                                                                                                                 (model.reserv.InitialReservoirHeatContent.value-model.surfaceplant.RemainingReservoirHeatContent.value[i])*100/model.reserv.InitialReservoirHeatContent.value)+NL)
-                           
+
         except BaseException as ex:
             tb = sys.exc_info()[2]
             print (str(ex))

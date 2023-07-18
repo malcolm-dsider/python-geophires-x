@@ -62,6 +62,72 @@ class GeophiresXTestCase(unittest.TestCase):
 
         assert result is not None
 
+    def test_reservoir_model_2(self):
+        client = GeophiresXClient()
+        result = client.get_geophires_result(
+            GeophiresInputParameters(
+                {
+                    'Print Output to Console': 0,
+                    'Time steps per year': 6,
+                    'Reservoir Model': 2,
+                    'Reservoir Depth': 5,
+                    'Gradient 1': 35,
+                    'Maximum Temperature': 250,
+                    'Number of Production Wells': 2,
+                    'Number of Injection Wells': 2,
+                    'Production Well Diameter': 5.5,
+                    'Injection Well Diameter': 5.5,
+                    'Ramey Production Wellbore Model': 1,
+                    'Injection Wellbore Temperature Gain': 0,
+                    'Production Flow Rate per Well': 30,
+                    'Fracture Shape': 4,
+                    'Fracture Height': 100,
+                    'Fracture Width': 100,
+                    'Reservoir Volume Option': 3,
+                    'Number of Fractures': 10,
+                    'Fracture Separation': 40,
+                    'Reservoir Volume': 125000000,
+                    'Productivity Index': 10,
+                    'Injectivity Index': 10,
+                    'Injection Temperature': 50,
+                    'Reservoir Heat Capacity': 774,
+                    'Reservoir Density': 2600,
+                    'Reservoir Thermal Conductivity': 3,
+                    'Reservoir Porosity': 0.04,
+                    'Water Loss Fraction': 0.02,
+                    'Maximum Drawdown': 1,
+                    'End-Use Option': 1,
+                    'Power Plant Type': 2,
+                    'Circulation Pump Efficiency': 0.8,
+                    'Utilization Factor': 0.9,
+                    'Surface Temperature': 20,
+                    'Ambient Temperature': 20,
+                    'Plant Lifetime': 35,
+                    'Economic Model': 3,
+                    'Fraction of Investment in Bonds': 0.75,
+                    'Inflated Bond Interest Rate': 0.05,
+                    'Inflated Equity Interest Rate': 0.1,
+                    'Inflation Rate': 0.02,
+                    'Combined Income Tax Rate': 0.3,
+                    'Gross Revenue Tax Rate': 0,
+                    'Investment Tax Credit Rate': 0.3,
+                    'Property Tax Rate': 0,
+                    'Inflation Rate During Construction': 0.05,
+                    'Well Drilling and Completion Capital Cost Adjustment Factor': 1,
+                    'Well Drilling Cost Correlation': 1,
+                    'Reservoir Stimulation Capital Cost Adjustment Factor': 1,
+                    'Surface Plant Capital Cost Adjustment Factor': 1,
+                    'Field Gathering System Capital Cost Adjustment Factor': 1,
+                    'Exploration Capital Cost Adjustment Factor': 1,
+                    'Wellfield O&M Cost Adjustment Factor': 1,
+                    'Surface Plant O&M Cost Adjustment Factor': 1,
+                    'Water Cost Adjustment Factor': 1,
+                }
+            )
+        )
+
+        assert result is not None
+
     def test_geophires_x_result(self):
         result = GeophiresXResult(os.path.abspath('geophires-result_example-1.out'))
         assert result is not None

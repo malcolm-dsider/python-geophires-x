@@ -16,7 +16,7 @@ import sys
 from datetime import datetime
 import logging
 import logging.config
-from AdvModel import AdvModel
+from .AdvModel import AdvModel
 import jsons
 from deepdiff import DeepDiff
 from pprint import pprint
@@ -42,7 +42,7 @@ def main():
 
     #write the outputs, if requested
     model.outputs.PrintOutputs(model)
-        
+
     #if the user has asked for it, copy the output file to the screen
     if model.outputs.printoutput:
         outputfile = "HDR.out"
@@ -52,7 +52,7 @@ def main():
 
             #Now write each line to the screen
             for line in content: sys.stdout.write(line)
-    
+
     #analysis
     #start by making a second model and comparing them
     #model1 = AdvModel()
@@ -92,7 +92,7 @@ def main():
 #    date_time = now.strftime("%Y%m%d%H%M%S")
 #    with open(date_time+'.json','w', encoding='UTF-8') as f:
 #        f.write(str(strJson))
-    
+
     logger.info("Complete "+ str(__name__) + ": " + sys._getframe().f_code.co_name)
 
 if __name__ == "__main__":

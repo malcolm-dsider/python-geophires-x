@@ -1,7 +1,7 @@
 # copyright, 2023, Malcolm I Ross
 import sys
-import Model
-import AdvGeoPHIRESUtils
+import geophires_x.Model as Model
+import geophires_x.AdvGeoPHIRESUtils as AdvGeoPHIRESUtils
 
 class AdvModel(Model.Model, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
     """
@@ -10,13 +10,13 @@ class AdvModel(Model.Model, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
     def __init__(self):
         """
         The __init__ function is called automatically every time the class is being used to create a new object.
-        The self parameter is a Python convention. It must be included in each function definition and points to the current instance of the class (the object that is being created). 
+        The self parameter is a Python convention. It must be included in each function definition and points to the current instance of the class (the object that is being created).
         :param self: Reference the class instance itself
         :return: Nothing
         :doc-author: Malcolm Ross
         """
         super().__init__()   # initialize the parent parameters and variables
-        
+
         model_elements = self.RunStoredProcedure("model_elements", [1])
         model_connections = self.RunStoredProcedure("model_connections", [1])
         self.RunStoredProcedure("delete_model", [14])
@@ -28,7 +28,7 @@ class AdvModel(Model.Model, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
 
     def read_parameters(self) -> None:
         """
-        The read_parameters function reads the parameters from the input file and stores them in a dictionary. 
+        The read_parameters function reads the parameters from the input file and stores them in a dictionary.
         :param self: Access the variables and other functions of the class
         :return: None
         :doc-author: Malcolm Ross
@@ -38,7 +38,7 @@ class AdvModel(Model.Model, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
 
         #Deal with all the parameter values that the user has provided.  This is handled on a class-by-class basis.
         self.logger.info("Read parameters for the newer elements of the Model and instantiate new attributes as needed")
-        
+
         if self.wellbores.IsAGS.value:
             #If we are doing AGS, we need to replace the various objects we with versions of the objects that have AGS functionality.
             # that means importing them, initializing them, then reading their parameters
@@ -58,7 +58,7 @@ class AdvModel(Model.Model, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
             del self.outputs
             import AGSOutputs
             self.outputs = AGSOutputs.AGSOutputs(self)
-            
+
             self.logger.info("Read the parameters for the AGS elements")
             self.reserv.read_parameters(self)
             self.wellbores.read_parameters(self)
@@ -94,10 +94,10 @@ class AdvModel(Model.Model, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
         :doc-author: Malcolm Ross
         """
         self.logger.info("Init "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
-        
+
         #This is where all the calculations are made using all the values that have been set.  This is handled on a class-by-class basis
         #We choose not to call the calculate of the parent, but rather let the child handle the call to the parent if it is needed.
-        
+
         #Reservoir
         self.SmartCalculate(self, self.reserv)
 
@@ -112,7 +112,7 @@ class AdvModel(Model.Model, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
 
         if self.economics.DoAddOnCalculations.value: self.SmartCalculate(self, self.addeconomics)
         if self.economics.DoCCUSCalculations.value: self.SmartCalculate(self, self.ccuseconomics)
- 
+
         self.logger.info("complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
 
     def __str__(self):

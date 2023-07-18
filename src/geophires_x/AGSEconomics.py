@@ -2,12 +2,12 @@ import sys
 import os
 import math
 import numpy as np
-import AdvModel
-import Economics
-import AdvGeoPHIRESUtils
-from Parameter import floatParameter, intParameter, boolParameter, OutputParameter, ReadParameter
-from Units import *
-from OptionList import WorkingFluid, Configuration, EndUseOptions, EconomicModel
+import geophires_x.AdvModel as AdvModel
+import geophires_x.Economics as Economics
+import geophires_x.AdvGeoPHIRESUtils as AdvGeoPHIRESUtils
+from .Parameter import floatParameter, intParameter, boolParameter, OutputParameter, ReadParameter
+from .Units import *
+from .OptionList import WorkingFluid, Configuration, EndUseOptions, EconomicModel
 
 #code from Koenraad
 import h5py
@@ -26,7 +26,7 @@ class AGSEconomics(Economics.Economics, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
     def __init__(self, model:AdvModel):
         """
         The __init__ function is the constructor for a class.  It is called whenever an instance of the class is created.  The __init__ function can take arguments, but self is always the first one. Self refers to the instance of the object that has already been created and it's used to access variables that belong to that object.&quot;
-        
+
         :param self: Reference the class object itself
         :param model: The container class of the application, giving access to everything else, including the logger
 
@@ -56,7 +56,7 @@ class AGSEconomics(Economics.Economics, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
         #local variable initiation
 
         #results are stored here and in the parent ProducedTemperature array
- 
+
         model.logger.info("complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
 
     def __str__(self):
@@ -65,7 +65,7 @@ class AGSEconomics(Economics.Economics, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
     def read_parameters(self, model:AdvModel) -> None:
         """
         The read_parameters function reads in the parameters from a dictionary and stores them in the aparmeters.  It also handles special cases that need to be handled after a value has been read in and checked.  If you choose to sublass this master class, you can also choose to override this method (or not), and if you do
-        
+
         :param self: Access variables that belong to a class
         :param model: The container class of the application, giving access to everything else, including the logger
 
@@ -82,11 +82,11 @@ class AGSEconomics(Economics.Economics, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
         self.Electricity_rate = model.surfaceplant.elecprice.value      #same units are GEOPHIRES
 
         model.logger.info("complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
- 
+
     def verify(self, model:AdvModel) -> int:
         """
         The validate function checks that all values provided are within the range expected by AGS modeling system. These values in within a smaller range than the value ranges available to GEOPHIRES-X
-        
+
         :param self: Access variables that belong to a class
         :param model: The container class of the application, giving access to everything else, including the logger
 
@@ -127,7 +127,7 @@ class AGSEconomics(Economics.Economics, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
     def Calculate(self, model:AdvModel) -> None:
         """
         The calculate function verifies, initializes, and calculate the values for the AGS model
-        
+
         :param self: Access variables that belong to a class
         :param model: The container class of the application, giving access to everything else, including the logger
 
@@ -135,7 +135,7 @@ class AGSEconomics(Economics.Economics, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
         :doc-author: Koenraad Beckers
         """
         model.logger.info("Init " + str(__class__) + ": " + sys._getframe().f_code.co_name)
-        
+
         if self.econmodel.value != EconomicModel.CLGS: #do a classical econ calculation
            super().Calculate(model)
         else:   #use the CLGS-Style economic calculations
@@ -155,7 +155,7 @@ class AGSEconomics(Economics.Economics, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
                     self.CAPEX_Surface_Plant = np.max(model.surfaceplant.Instantaneous_electricity_production_method_1)*self.Power_plant_cost_per_kWe.value/1e6 #[M$]
                 else:
                     self.CAPEX_Surface_Plant = np.max(model.surfaceplant.Instantaneous_electricity_production_method_4)*self.Power_plant_cost_per_kWe.value/1e6 #[M$]
-        
+
             self.TotalCAPEX = self.CAPEX_Drilling + self.CAPEX_Surface_Plant           #Total system capital cost (only includes drilling and surface plant cost) [M$]
 
             #Calculate OPEX
@@ -165,7 +165,7 @@ class AGSEconomics(Economics.Economics, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
                 self.OPEX_Plant = self.O_and_M_cost_plant.value*self.CAPEX_Surface_Plant  #Annual plant O&M cost [M$/year]
 
             self.AverageOPEX_Plant = np.average(self.OPEX_Plant)
-        
+
             #Calculate LCO(H)(E)
             Discount_vector = 1./np.power(1+self.Discount_rate,np.linspace(0,model.surfaceplant.Lifetime-1,model.surfaceplant.Lifetime))
             if model.surfaceplant.End_use == EndUseOptions.HEAT:
@@ -206,6 +206,6 @@ class AGSEconomics(Economics.Economics, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
         if resultkey == None: model.logger.warn("Failed To Store "+ str(__class__) + " " + os.path.abspath(__file__))
 
         model.logger.info("complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
-        
+
     def __str__(self):
         return "AGSEconomics"
