@@ -129,7 +129,10 @@ class GeophiresXResult:
 
     @property
     def direct_use_heat_breakeven_price_USD_per_MMBTU(self):
-        return self.result['SUMMARY OF RESULTS']['Direct-Use heat breakeven price']['value']
+        try:
+            return self.result['SUMMARY OF RESULTS']['Direct-Use heat breakeven price']['value']
+        except KeyError:
+            return None
 
     def _get_result_field(self, field):
         # TODO make this less fragile with proper regex
