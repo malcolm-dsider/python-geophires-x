@@ -2,16 +2,16 @@ import sys
 import os
 import math
 import numpy as np
-from Parameter import floatParameter, intParameter, boolParameter, OutputParameter, ReadParameter
-from Units import *
-import Model
-from OptionList import ReservoirModel
+from .Parameter import floatParameter, intParameter, boolParameter, OutputParameter, ReadParameter
+from .Units import *
+import geophires_x.Model as Model
+from .OptionList import ReservoirModel
 
 class WellBores:
     def __init__(self, model:Model):
         """
         The __init__ function is the constructor for a class.  It is called whenever an instance of the class is created.  The __init__ function can take arguments, but self is always the first one. Self refers to the instance of the object that has already been created and it's used to access variables that belong to that object.&quot;
-        
+
         :param self: Reference the class object itself
         :param model: The container class of the application, giving access to everything else, including the logger
 
@@ -25,7 +25,7 @@ class WellBores:
         #This also includes all Parameters that are calculated and then published using the Printouts function.
         #If you choose to sublass this master class, you can do so before or after you create your own parameters.  If you do, you can also choose to call this method from you class, which will effectively add and set all these parameters to your class.
 
-        #These disctionarie contains a list of all the parameters set in this object, stored as "Parameter" and OutputParameter Objects.  This will alow us later to access them in a user interface and get that list, along with unit type, preferred units, etc. 
+        #These disctionarie contains a list of all the parameters set in this object, stored as "Parameter" and OutputParameter Objects.  This will alow us later to access them in a user interface and get that list, along with unit type, preferred units, etc.
         self.ParameterDict = {}
         self.OutputParameterDict = {}
 
@@ -86,7 +86,7 @@ class WellBores:
     def read_parameters(self, model:Model) -> None:
         """
         The read_parameters function reads in the parameters from a dictionary and stores them in the aparmeters.  It also handles special cases that need to be handled after a value has been read in and checked.  If you choose to sublass this master class, you can also choose to override this method (or not), and if you do
-        
+
         :param self: Access variables that belong to a class
         :param model: The container class of the application, giving access to everything else, including the logger
 
@@ -123,9 +123,9 @@ class WellBores:
         else:
             model.logger.info("No parameters read becuase no content provided")
         model.logger.info("read parameters complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
-    
+
     #user-defined functions
-    def vaporpressurewater(self, Twater) -> float: 
+    def vaporpressurewater(self, Twater) -> float:
         if Twater < 100:
             A = 8.07131
             B = 1730.63
@@ -133,11 +133,11 @@ class WellBores:
         else:
             A = 8.14019
             B = 1810.94
-            C = 244.485 
+            C = 244.485
         vaporpressurewater = 133.322*(10**(A-B/(C+Twater)))/1000 #water vapor pressure in kPa using Antione Equation
         return vaporpressurewater
- 
-    def RameyCalc(self, krock:float, rhorock:float, cprock:float, welldiam:float, tv, utilfactor:float, flowrate:float, cpwater:float, Trock:float, 
+
+    def RameyCalc(self, krock:float, rhorock:float, cprock:float, welldiam:float, tv, utilfactor:float, flowrate:float, cpwater:float, Trock:float,
                   Tresoutput:float, averagegradient:float, depth:float):
         #this code is only valid so far for 1 gradient and deviation = 0
         #For multiple gradients, use Ramey's model for every layer
@@ -150,7 +150,7 @@ class WellBores:
         framey[0] = framey[1]    #fource the first value to be the same as the second to get away from near surface effects
         rameyA = flowrate*cpwater*framey/2/math.pi/krock
         TempDrop = -((Trock - Tresoutput) - averagegradient*(depth - rameyA) + (Tresoutput - averagegradient*rameyA - Trock)*np.exp(-depth/rameyA))
-        
+
         return TempDrop
 
     def WellPressureDrop(self, model:Model, Taverage:float, wellflowrate:float, welldiam:float, impedancemodelused:bool, depth:float):
@@ -195,7 +195,7 @@ class WellBores:
 
         if self.impedancemodelused.value: DPWell = f1*(rhowater*v**2/2)*(depth/welldiam)/1E3    #assumed everything stays liquid throughout, calculate well pressure drop [kPa]; /1E3 to convert from Pa to kPa
         else: DPWell = []    #it will be calculated elsewhere
- 
+
         return DPWell, f1, v, rhowater
 
     def ProdPressureDropsAndPumpingPowerUsingImpedenceModel(self, f3:float, vprod:float, rhowaterinj:float, rhowaterprod:float,
@@ -204,18 +204,18 @@ class WellBores:
         #Calculate Pressure Drops and Pumping Power needed for the production well using the Impedance Model
         #production well pressure drops [kPa]
         DPProdWell = f3*(rhowaterprod*vprod**2/2.)*(depth/prodwelldiam)/1E3     #/1E3 to convert from Pa to kPa
-    
+
         #reservoir pressure drop [kPa]
         DPReserv = impedance*nprod*wellflowrate*1000./rhowaterreservoir
-    
+
         #buoyancy pressure drop [kPa]
         DPBouyancy = (rhowaterprod-rhowaterinj)*depth*9.81/1E3 # /1E3 to convert from Pa to kPa
-    
+
         #overall pressure drop
         DPOverall = DPReserv + DPProdWell + DPBouyancy
 
         #calculate pumping power [MWe] (approximate)
-        PumpingPower = DPOverall*nprod*wellflowrate*(1+waterloss)/rhowaterinj/pumpeff/1E3   
+        PumpingPower = DPOverall*nprod*wellflowrate*(1+waterloss)/rhowaterinj/pumpeff/1E3
 
         #in GEOPHIRES v1.2, negative pumping power values become zero (b/c we are not generating electricity)
         PumpingPower = [0. if x<0. else x for x in PumpingPower]
@@ -227,7 +227,7 @@ class WellBores:
         #Calculate Pressure Drops and Pumping Power needed for the injection well using the Impedance Model
         #injection well pressure drops [kPa]
         DPInjWell = f1*(rhowaterinj*vinj**2/2)*(depth/injwelldiam)/1E3      #/1E3 to convert from Pa to kPa
-        
+
         #overall pressure drop
         newDPOverall = DPOverall + DPInjWell
 
@@ -259,8 +259,8 @@ class WellBores:
                 if Pprodwellhead < Pminimum:
                     Pprodwellhead = Pminimum
                     print("Warning: provided production wellhead pressure under minimum pressure. GEOPHIRES will assume minimum wellhead pressure")
-                    model.logger.warning("Provided production wellhead pressure under minimum pressure. GEOPHIRES will assume minimum wellhead pressure") 
-        
+                    model.logger.warning("Provided production wellhead pressure under minimum pressure. GEOPHIRES will assume minimum wellhead pressure")
+
             PIkPa = PI/100.0 #convert PI from kg/s/bar to kg/s/kPa
 
             #calculate pumping depth
@@ -271,14 +271,14 @@ class WellBores:
                 print("Warning: GEOPHIRES calculates negative production well pumping depth. No production well pumps will be assumed")
                 model.logger.warning("GEOPHIRES calculates negative production well pumping depth. No production well pumps will be assumed")
             elif pumpdepthfinal > 600.0:
-                print("Warning: GEOPHIRES calculates production pump depth to be deeper than 600 m. Verify reservoir pressure, production well flow rate and production well dimensions")  
-                model.logger.warning("GEOPHIRES calculates production pump depth to be deeper than 600 m. Verify reservoir pressure, production well flow rate and production well dimensions")  
+                print("Warning: GEOPHIRES calculates production pump depth to be deeper than 600 m. Verify reservoir pressure, production well flow rate and production well dimensions")
+                model.logger.warning("GEOPHIRES calculates production pump depth to be deeper than 600 m. Verify reservoir pressure, production well flow rate and production well dimensions")
 
             #calculate production well pumping pressure [kPa]
             DPProdWell = Pprodwellhead - (Phydrostaticcalc - wellflowrate/PIkPa - rhowaterprod*9.81*depth/1E3 - f3*(rhowaterprod*vprod**2/2.)*(depth/prodwelldiam)/1E3)
             PumpingPowerProd = DPProdWell*nprod*wellflowrate/rhowaterprod/pumpeff/1E3 #[MWe] total pumping power for production wells
             PumpingPowerProd = np.array([0. if x<0. else x for x in PumpingPowerProd])
-            
+
         #total pumping power
         if productionwellpumping: PumpingPower = PumpingPowerProd
 
@@ -308,13 +308,13 @@ class WellBores:
                 if Pprodwellhead < Pminimum:
                     Pprodwellhead = Pminimum
                     print("Warning: provided production wellhead pressure under minimum pressure. GEOPHIRES will assume minimum wellhead pressure")
-                    model.logger.warning("Provided production wellhead pressure under minimum pressure. GEOPHIRES will assume minimum wellhead pressure") 
-               
+                    model.logger.warning("Provided production wellhead pressure under minimum pressure. GEOPHIRES will assume minimum wellhead pressure")
+
         IIkPa = II/100.0 #convert II from kg/s/bar to kg/s/kPa
 
         #necessary injection wellhead pressure [kPa]
         Pinjwellhead = Phydrostaticcalc + wellflowrate*(1+waterloss)*nprod/ninj/IIkPa - rhowaterinj*9.81*depth/1E3 + f1*(rhowaterinj*vinj**2/2)*(depth/injwelldiam)/1E3
-            
+
         #plant outlet pressure [kPa]
         if usebuiltinoutletplantcorrelation:
             DPSurfaceplant = 68.95 #[kPa] assumes 10 psi pressure drop in surface equipment
@@ -324,7 +324,7 @@ class WellBores:
         DPInjWell = Pinjwellhead-Pplantoutlet
         PumpingPowerInj = DPInjWell*nprod*wellflowrate*(1+waterloss)/rhowaterinj/pumpeff/1E3 #[MWe] total pumping power for injection wells
         PumpingPowerInj = np.array([0. if x<0. else x for x in PumpingPowerInj])
-    
+
         #total pumping power
         if productionwellpumping: PumpingPower = PumpingPowerInj + PumpingPowerProd
         else: PumpingPower = PumpingPowerInj
@@ -338,7 +338,7 @@ class WellBores:
         """
         The Calculate function is where all the calculations are done.
         This function can be called multiple times, and will only recalculate what has changed each time it is called.
-        
+
         :param self: Access variables that belongs to the class
         :param model: The container class of the application, giving access to everything else, including the logger
         :return: Nothing, but it does make calculations and set values in the model
@@ -401,5 +401,5 @@ class WellBores:
             self.PumpingPower.value, self.PumpingPowerInj.value, self.DPInjWell.value, model.surfaceplant.Pplantoutlet.value, self.Pprodwellhead.value =  self.InjPressureDropAndPumpingPowerUsingIndexes(model, self.usebuiltinhydrostaticpressurecorrelation, self.productionwellpumping.value, self.usebuiltinppwellheadcorrelation, model.surfaceplant.usebuiltinoutletplantcorrelation.value,
                                         model.reserv.Trock.value, model.reserv.Tsurf.value, model.reserv.depth.value, model.reserv.averagegradient.value, self.ppwellhead.value, self.II.value, self.prodwellflowrate.value, f1, vinj,
                                         self.injwelldiam.value, self.nprod.value, self.ninj.value, model.reserv.waterloss.value, model.surfaceplant.pumpeff.value, self.rhowaterinj, model.surfaceplant.Pplantoutlet.value, self.PumpingPowerProd.value)
-      
+
         model.logger.info("complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)

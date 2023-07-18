@@ -4,16 +4,16 @@ import math
 from functools import lru_cache
 import numpy as np
 from mpmath import *
-from OptionList import ReservoirModel, FractureShape, ReservoirVolume
-from Parameter import intParameter, floatParameter, strParameter, listParameter, OutputParameter, ReadParameter
-from Units import *
-import Model
+from .OptionList import ReservoirModel, FractureShape, ReservoirVolume
+from .Parameter import intParameter, floatParameter, strParameter, listParameter, OutputParameter, ReadParameter
+from .Units import *
+import geophires_x.Model as Model
 
 class Reservoir:
     """This class is the parent class for modeling the Reservoir.
     """
     #user-defined functions
-    def densitywater(self, Twater) -> float:   
+    def densitywater(self, Twater) -> float:
         T = Twater+273.15
         rhowater = ( .7983223 + (1.50896E-3 - 2.9104E-6*T) * T) * 1E3 #water density correlation as used in Geophires v1.2 [kg/m3]
         return  rhowater
@@ -35,10 +35,10 @@ class Reservoir:
 
     def __init__(self, model:Model):
         """
-        The __init__ function is called automatically when a class is instantiated. 
-        It initializes the attributes of an object, and sets default values for certain arguments that can be overridden by user input. 
+        The __init__ function is called automatically when a class is instantiated.
+        It initializes the attributes of an object, and sets default values for certain arguments that can be overridden by user input.
         The __init__ function is used to set up all the parameters in the Reservoir.
-        
+
         :param self: Store data that will be used by the class
         :param model: The container class of the application, giving access to everything else, including the logger
         :return: None
@@ -50,7 +50,7 @@ class Reservoir:
         #This includes setting up temporary variables that will be available to all the class but noy read in by user, or used for Output
         #This also includes all Parameters that are calculated and then published using the Printouts function.
         #If you choose to subclass this master class, you can do so before or after you create your own parameters.  If you do, you can also choose to call this method from you class, which will effectively add and set all these parameters to your class.
-         
+
         #These disctionaries contains a list of all the parameters set in this object, stored as "Parameter" and OutputParameter Objects.  This will alow us later to access them in a user interface and get that list, along with unit type, preferred units, etc.
         self.ParameterDict = {}
         self.OutputParameterDict = {}
@@ -112,10 +112,10 @@ class Reservoir:
 
     def read_parameters(self, model:Model) -> None:
         """
-        The read_parameters function reads in the parameters from a dictionary created by reading the user-provided file and updates the parameter values for this object. 
-        
+        The read_parameters function reads in the parameters from a dictionary created by reading the user-provided file and updates the parameter values for this object.
+
         The function reads in all of the parameters that relate to this object, including those that are inherited from other objects. It then updates any of these parameter values that have been changed by the user.  It also handles any special cases.
-        
+
         :param self: Reference the class instance (such as it is) from within the class
         :param model: The container class of the application, giving access to everything else, including the logger
         :return: None
@@ -140,7 +140,7 @@ class Reservoir:
                     #handle special cases
                     if ParameterToModify.Name == "Reservoir Model":
                         if ParameterReadIn.sValue == '1': ParameterToModify.value = ReservoirModel.MULTIPLE_PARALLEL_FRACTURES   #Multiple parallel fractures model (LANL)
-                        elif ParameterReadIn.sValue == '2': ParameterToModify.value = ReservoirModel.LINEAR_HEAT_SWEEP    #Volumetric block model (1D linear heat sweep model (Stanford))                       
+                        elif ParameterReadIn.sValue == '2': ParameterToModify.value = ReservoirModel.LINEAR_HEAT_SWEEP    #Volumetric block model (1D linear heat sweep model (Stanford))
                         elif ParameterReadIn.sValue == '3': ParameterToModify.value = ReservoirModel.SINGLE_FRACTURE     #Drawdown parameter model (Tester)
                         elif ParameterReadIn.sValue == '4': ParameterToModify.value = ReservoirModel.ANNUAL_PERCENTAGE    #Thermal drawdown percentage model (GETEM)
                         elif ParameterReadIn.sValue == '5': ParameterToModify.value = ReservoirModel.USER_PROVIDED_PROFILE     #Generic user-provided temperature profile
@@ -159,15 +159,15 @@ class Reservoir:
 
                         if ParameterToModify.value == ReservoirVolume.RES_VOL_ONLY and ParameterToModify.value in [ReservoirModel.MULTIPLE_PARALLEL_FRACTURES, ReservoirModel.LINEAR_HEAT_SWEEP]:
                             ParameterToModify.value = ReservoirVolume.RES_VOL_FRAC_NUM
-                            print("Warning: If user-selected reservoir model is 1 or 2, then user-selected reservoir volume option cannot be 4 but should be 1, 2, or 3. GEOPHIRES will assume reservoir volume option 3.")    
+                            print("Warning: If user-selected reservoir model is 1 or 2, then user-selected reservoir volume option cannot be 4 but should be 1, 2, or 3. GEOPHIRES will assume reservoir volume option 3.")
                             model.logger.warning("If user-selected reservoir model is 1 or 2, then user-selected reservoir volume option cannot be 4 but should be 1, 2, or 3. GEOPHIRES will assume reservoir volume option 3.")
- 
+
                     elif ParameterToModify.Name == "Fracture Shape":
                         if ParameterReadIn.sValue == '1': ParameterToModify.value = FractureShape.CIRCULAR_AREA     #   fracshape = 1  Circular fracture with known area
                         elif ParameterReadIn.sValue == '2': ParameterToModify.value = FractureShape.CIRCULAR_DIAMETER      #   fracshape = 2  Circular fracture with known diameter
                         elif ParameterReadIn.sValue == '3': ParameterToModify.value = FractureShape.SQUARE #   fracshape = 3  Square fracture
                         else: ParameterToModify.value = FractureShape.RECTANGULAR   #   fracshape = 4  Rectangular fracture
-                            
+
                     elif ParameterToModify.Name.startswith("Gradient"):
                         parts = ParameterReadIn.Name.split(' ')
                         position = int(parts[1]) - 1
@@ -176,7 +176,7 @@ class Reservoir:
                             model.reserv.gradient.value[position] = model.reserv.gradient.value[position] / 1000.0 #convert C/m
                             model.reserv.gradient.CurrentUnits = TemperatureGradientUnit.DEGREESCPERM
                         if model.reserv.gradient.value[position] < 1e-6: model.reserv.gradient.value[position] = 1e-6    #convert 0 C/m gradients to very small number, avoids divide by zero errors later
-                            
+
                     elif ParameterToModify.Name.startswith("Thickness"):
                         parts = ParameterReadIn.Name.split(' ')
                         position = int(parts[1]) - 1
@@ -202,7 +202,7 @@ class Reservoir:
         """
         The Calculate function is where all the calculations are done.
         This function can be called multiple times, and will only recalculate what has changed each time it is called.
-        
+
         :param self: Access variables that belongs to the class
         :param model: The container class of the application, giving access to everything else, including the logger
         :return: Nothing, but it does make calculations and set values in the model
@@ -275,9 +275,9 @@ class Reservoir:
         # temperature gain in injection wells
         model.wellbores.Tinj.value = model.wellbores.Tinj.value + model.wellbores.tempgaininj.value
 
-        #-------------------------------- 
+        #--------------------------------
         #calculate reservoir heat content
-        #-------------------------------- 
+        #--------------------------------
         self.InitialReservoirHeatContent.value = self.resvolcalc.value*self.rhorock.value*self.cprock.value*(self.Trock.value-model.wellbores.Tinj.value)/1E15   #10^15 J
-                
+
         model.logger.info("complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)

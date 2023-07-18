@@ -1,5 +1,5 @@
 import sys
-from Parameter import ParameterEntry
+from .Parameter import ParameterEntry
 from os.path import exists
 #import Model
 
@@ -13,16 +13,16 @@ def read_input_file(model, ReturnDict1):
         try:
             if exists(fname):
                 content = []
-                model.logger.info("Found filename: " + fname + " Proceeding with run using input parameters from that file")
+                model.logger.info(f'Found filename: {fname}. Proceeding with run using input parameters from that file')
                 with open(fname, encoding='UTF-8') as f:
                     content = f.readlines()    #store all input in one long strong that will be passed to all objects so they can parse out their specific parameters (and ignore the rest)
             else:
-                model.logger.warn("File: "+  fname + "  not found - proceeding with default parameter run...")
+                model.logger.warn(f'File: {fname} not found - proceeding with default parameter run...')
                 return
 
         except BaseException as ex:
             print (ex)
-            model.logger.error("Error " + str(ex) + "using filename:" + fname + " proceeding with default parameter run...")
+            model.logger.error(f'Error {ex} using filename {fname} proceeding with default parameter run...')
             return
 
         #successful read of data into list.  Now make a dictionary with all the parameter entries.  Index will be the unique name of the parameter.  The value with be a "ParameterEntry" structure, with name, value (optionally with units), optional comment
@@ -35,7 +35,7 @@ def read_input_file(model, ReturnDict1):
             elements = line.split(',')   #split on a comma - that should give us major divisions,  Could be: 1) Desc and Val (2 elements), 2) Desc and Val with Unit (2 elements, Unit split from Val by space}, 3) Desc, Val, and comment (3 elements), 4) Desc, Val with Unit, Comment (3 elements, Unit split from Val by space}
                                             #if there are more than 3 comments, we are g oing to assume it is parseable, and that the commas are in the comment
             if len(elements) < 2: continue   #not enough commas, so must not be data to parse
-                
+
             #we have good data, so make intial assumptions
             Desc = elements[0].strip()
             sVal = elements[1].strip()
@@ -51,5 +51,5 @@ def read_input_file(model, ReturnDict1):
             ReturnDict1[Desc] = PEntry     #make the dictionary element
 
     else: model.logger.warn("No input parameter file specified on the command line. Proceeding with default parameter run... ")
-    
-    model.logger.info("Complete "+ str(__name__) + ": " + sys._getframe().f_code.co_name)
+
+    model.logger.info(f'Complete {__name__}: {sys._getframe().f_code.co_name}')

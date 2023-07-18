@@ -1,18 +1,18 @@
 import sys
 import os
 import numpy as np
-from OptionList import EndUseOptions, PowerPlantType
-from Parameter import floatParameter, intParameter, OutputParameter, ReadParameter
-from Units import *
-import Model
+from .OptionList import EndUseOptions, PowerPlantType
+from .Parameter import floatParameter, intParameter, OutputParameter, ReadParameter
+from .Units import *
+import geophires_x.Model as Model
 
 class SurfacePlant:
     def __init__(self, model:Model):
         """
-        The __init__ function is called automatically when a class is instantiated. 
-        It initializes the attributes of an object, and sets default values for certain arguments that can be overridden by user input. 
+        The __init__ function is called automatically when a class is instantiated.
+        It initializes the attributes of an object, and sets default values for certain arguments that can be overridden by user input.
         The __init__ function is used to set up all the parameters in the Surfaceplant.
-        
+
         :param self: Store data that will be used by the class
         :param model: The container class of the application, giving access to everything else, including the logger
         :return: None
@@ -25,7 +25,7 @@ class SurfacePlant:
         #This includes setting up temporary variables that will be available to all the class but noy read in by user, or used for Output
         #This also includes all Parameters that are calculated and then published using the Printouts function.
 
-        #These disctionarie contains a list of all the parameters set in this object, stored as "Parameter" and OutputParameter Objects.  This will alow us later to access them in a user interface and get that list, along with unit type, preferred units, etc. 
+        #These disctionarie contains a list of all the parameters set in this object, stored as "Parameter" and OutputParameter Objects.  This will alow us later to access them in a user interface and get that list, along with unit type, preferred units, etc.
         self.ParameterDict = {}
         self.OutputParameterDict = {}
 
@@ -73,7 +73,7 @@ class SurfacePlant:
     def read_parameters(self, model:Model) -> None:
         """
         The read_parameters function reads in the parameters from a dictionary and stores them in the aparmeters.  It also handles special cases that need to be handled after a value has been read in and checked.  If you choose to sublass this master class, you can also choose to override this method (or not), and if you do
-        
+
         :param self: Access variables that belong to a class
         :param model: The container class of the application, giving access to everything else, including the logger
 
@@ -121,12 +121,12 @@ class SurfacePlant:
                                 model.wellbores.impedancemodelallowed.value = False
                                 model.wellbores.productionwellpumping.value = False
                                 self.setinjectionpressurefixed = True
-                        elif self.enduseoption.value in [EndUseOptions.COGENERATION_BOTTOMING_EXTRA_HEAT, EndUseOptions.COGENERATION_BOTTOMING_EXTRA_ELECTRICTY]: 
+                        elif self.enduseoption.value in [EndUseOptions.COGENERATION_BOTTOMING_EXTRA_HEAT, EndUseOptions.COGENERATION_BOTTOMING_EXTRA_ELECTRICTY]:
                             if ParameterToModify.value in [PowerPlantType.SINGLE_FLASH, PowerPlantType.DOUBLE_FLASH]: #co-generation bottoming cycle with single- or double-flash power plant assumes production well pumping
                                 model.wellbores.impedancemodelallowed.value = False
                                 self.setinjectionpressurefixed = True
-                        elif self.enduseoption.value in [EndUseOptions.COGENERATION_PARALLEL_EXTRA_HEAT, EndUseOptions.COGENERATION_PARALLEL_EXTRA_ELECTRICTY]:         
-                            if ParameterToModify.value in [PowerPlantType.SINGLE_FLASH, PowerPlantType.DOUBLE_FLASH]: #co-generation parallel cycle with single- or double-flash power plant assumes production well pumping            
+                        elif self.enduseoption.value in [EndUseOptions.COGENERATION_PARALLEL_EXTRA_HEAT, EndUseOptions.COGENERATION_PARALLEL_EXTRA_ELECTRICTY]:
+                            if ParameterToModify.value in [PowerPlantType.SINGLE_FLASH, PowerPlantType.DOUBLE_FLASH]: #co-generation parallel cycle with single- or double-flash power plant assumes production well pumping
                                 model.wellbores.impedancemodelallowed.value = False
                                 self.setinjectionpressurefixed = True
                     if ParameterToModify.Name == "Plant Outlet Pressure":
@@ -158,7 +158,7 @@ class SurfacePlant:
         """
         The Calculate function is where all the calculations are done.
         This function can be called multiple times, and will only recalculate what has changed each time it is called.
-        
+
         :param self: Access variables that belongs to the class
         :param model: The container class of the application, giving access to everything else, including the logger
         :return: Nothing, but it does make calculations and set values in the model
@@ -189,7 +189,7 @@ class SurfacePlant:
             T1 = self.TenteringPP.value + 273.15
             T2 = self.Tenv.value + 273.15
             self.Availability.value = ((A-B*T0)*(T1-T2)+(B-C*T0)/2.0*(T1**2-T2**2)+C/3.0*(T1**3-T2**3)-A*T0*np.log(T1/T2))*2.2046/947.83    #MJ/kg
-    
+
             if self.pptype.value == PowerPlantType.SUB_CRITICAL_ORC:
                 if (self.Tenv.value < 15.):
                     C1 = 2.746E-3
@@ -223,7 +223,7 @@ class SurfacePlant:
                 ReinjTemp = (1.-Tfraction)*reinjtll + Tfraction*reinjtul
             elif self.pptype.value == PowerPlantType.SUPER_CRITICAL_ORC:
                 if (self.Tenv.value < 15.):
-                    C2 = -1.55E-5             
+                    C2 = -1.55E-5
                     C1 = 7.604E-3
                     C0 = -3.78E-1
                     D2 = -1.499E-5
@@ -231,7 +231,7 @@ class SurfacePlant:
                     D0 = -3.7915E-1
                     Tfraction = (self.Tenv.value-5.)/10.
                 else:
-                    C2 = -1.499E-5           
+                    C2 = -1.499E-5
                     C1 = 7.4268E-3
                     C0 = -3.7915E-1
                     D2 = -1.55E-5
@@ -255,7 +255,7 @@ class SurfacePlant:
                     Tfraction = (self.Tenv.value-15.)/10.
                 reinjtll = C1*self.TenteringPP.value + C0
                 reinjtul = D1*self.TenteringPP.value + D0
-                ReinjTemp = (1.-Tfraction)*reinjtll + Tfraction*reinjtul        
+                ReinjTemp = (1.-Tfraction)*reinjtll + Tfraction*reinjtul
             elif self.pptype.value == PowerPlantType.SINGLE_FLASH:
                 if (self.Tenv.value < 15.):
                     C2 = -4.27318E-7
@@ -334,7 +334,7 @@ class SurfacePlant:
                 reinjtll = C2*self.TenteringPP.value**2 + C1*self.TenteringPP.value + C0
                 reinjtul = D2*self.TenteringPP.value**2 + D1*self.TenteringPP.value + D0
                 ReinjTemp = (1.-Tfraction)*reinjtll + Tfraction*reinjtul
-    
+
             #check if reinjectemp (model calculated) >= Tinj (user provided)
             if self.enduseoption.value == EndUseOptions.ELECTRICITY: #pure electricity
                 if np.min(ReinjTemp) < model.wellbores.Tinj.value:
@@ -356,7 +356,7 @@ class SurfacePlant:
                     model.wellbores.Tinj.value = np.min(ReinjTemp)
                     print("Warning: injection temperature incorrect but cannot be lowered")
                     model.logger.warning("injection temperature incorrect but cannot be lowered")
-    
+
             #calculate electricity/heat
             if self.enduseoption.value == EndUseOptions.ELECTRICITY: #pure electricity
                 self.ElectricityProduced.value = self.Availability.value*etau*model.wellbores.nprod.value*model.wellbores.prodwellflowrate.value
@@ -364,14 +364,14 @@ class SurfacePlant:
                 HeatExtractedTowardsElectricity = self.HeatExtracted.value
             elif self.enduseoption.value in [EndUseOptions.COGENERATION_TOPPING_EXTRA_ELECTRICTY, EndUseOptions.COGENERATION_TOPPING_EXTRA_HEAT]: #enduseoption = 3: cogen topping cycle
                 self.ElectricityProduced.value = self.Availability.value*etau*model.wellbores.nprod.value*model.wellbores.prodwellflowrate.value
-                self.HeatExtracted.value = model.wellbores.nprod.value*model.wellbores.prodwellflowrate.value*model.reserv.cpwater.value*(model.wellbores.ProducedTemperature.value - model.wellbores.Tinj.value)/1E6 #Heat extracted from geofluid [MWth]        
-                self.HeatProduced.value = self.enduseefficiencyfactor.value*model.wellbores.nprod.value*model.wellbores.prodwellflowrate.value*model.reserv.cpwater.value*(ReinjTemp - model.wellbores.Tinj.value)/1E6 #Useful heat for direct-use application [MWth] 
+                self.HeatExtracted.value = model.wellbores.nprod.value*model.wellbores.prodwellflowrate.value*model.reserv.cpwater.value*(model.wellbores.ProducedTemperature.value - model.wellbores.Tinj.value)/1E6 #Heat extracted from geofluid [MWth]
+                self.HeatProduced.value = self.enduseefficiencyfactor.value*model.wellbores.nprod.value*model.wellbores.prodwellflowrate.value*model.reserv.cpwater.value*(ReinjTemp - model.wellbores.Tinj.value)/1E6 #Useful heat for direct-use application [MWth]
                 HeatExtractedTowardsElectricity = model.wellbores.nprod.value*model.wellbores.prodwellflowrate.value*model.reserv.cpwater.value*(model.wellbores.ProducedTemperature.value - ReinjTemp)/1E6
             elif self.enduseoption.value in [EndUseOptions.COGENERATION_BOTTOMING_EXTRA_HEAT, EndUseOptions.COGENERATION_BOTTOMING_EXTRA_ELECTRICTY]: #enduseoption = 4: cogen bottoming cycle
                 self.ElectricityProduced.value = self.Availability.value*etau*model.wellbores.nprod.value*model.wellbores.prodwellflowrate.value
                 self.HeatExtracted.value = model.wellbores.nprod.value*model.wellbores.prodwellflowrate.value*model.reserv.cpwater.value*(model.wellbores.ProducedTemperature.value - model.wellbores.Tinj.value)/1E6 #Heat extracted from geofluid [MWth]
                 self.valueHeatProduced.value = self.enduseefficiencyfactor.value*model.wellbores.nprod.value*model.wellbores.prodwellflowrate*model.reserv.cpwater.value*(model.wellbores.ProducedTemperature.value - self.Tchpbottom.value)/1E6 #Useful heat for direct-use application [MWth]
-                HeatExtractedTowardsElectricity = model.wellbores.nprod.value*model.wellbores.prodwellflowrate.value*model.reserv.cpwater.value*(self.Tchpbottom.value - model.wellbores.Tinj.value)/1E6        
+                HeatExtractedTowardsElectricity = model.wellbores.nprod.value*model.wellbores.prodwellflowrate.value*model.reserv.cpwater.value*(self.Tchpbottom.value - model.wellbores.Tinj.value)/1E6
             elif self.enduseoption.value in [EndUseOptions.COGENERATION_PARALLEL_EXTRA_ELECTRICTY, EndUseOptions.COGENERATION_PARALLEL_EXTRA_HEAT]: #enduseoption = 5: cogen split of mass flow rate
                 self.ElectricityProduced.value = self.Availability.value*etau*model.wellbores.nprod.value*model.wellbores.prodwellflowrate.value*(1.-self.chpfraction.value) #electricity part [MWe]
                 self.HeatExtracted.value = model.wellbores.nprod.value*model.wellbores.prodwellflowrate.value*model.reserv.cpwater.value*(model.wellbores.ProducedTemperature.value - model.wellbores.Tinj.value)/1E6 #Total amount of heat extracted from geofluid [MWth]
@@ -382,7 +382,7 @@ class SurfacePlant:
             if self.enduseoption.value != EndUseOptions.HEAT:
                 self.NetElectricityProduced.value = self.ElectricityProduced.value - model.wellbores.PumpingPower.value
                 self.FirstLawEfficiency.value = self.NetElectricityProduced.value/HeatExtractedTowardsElectricity
-        
+
         #---------------------------------------------
         # Calculate annual electricity/heat production
         #---------------------------------------------
@@ -390,10 +390,10 @@ class SurfacePlant:
         self.PumpingkWh.value = np.zeros(self.plantlifetime.value)
         for i in range(0,self.plantlifetime.value):
             self.HeatkWhExtracted.value[i] = np.trapz(self.HeatExtracted.value[(0+i*model.economics.timestepsperyear.value):((i+1)*model.economics.timestepsperyear.value)+1],dx = 1./model.economics.timestepsperyear.value*365.*24.)*1000.*self.utilfactor.value
-            self.PumpingkWh.value[i] = np.trapz(model.wellbores.PumpingPower.value[(0+i*model.economics.timestepsperyear.value):((i+1)*model.economics.timestepsperyear.value)+1],dx = 1./model.economics.timestepsperyear.value*365.*24.)*1000.*self.utilfactor.value   
+            self.PumpingkWh.value[i] = np.trapz(model.wellbores.PumpingPower.value[(0+i*model.economics.timestepsperyear.value):((i+1)*model.economics.timestepsperyear.value)+1],dx = 1./model.economics.timestepsperyear.value*365.*24.)*1000.*self.utilfactor.value
         if self.enduseoption.value != EndUseOptions.HEAT: #all these end-use options have an electricity generation component
             self.TotalkWhProduced.value = np.zeros(self.plantlifetime.value)
-            self.NetkWhProduced.value = np.zeros(self.plantlifetime.value) 
+            self.NetkWhProduced.value = np.zeros(self.plantlifetime.value)
             for i in range(0,self.plantlifetime.value):
                 self.TotalkWhProduced.value[i] = np.trapz(self.ElectricityProduced.value[(0+i*model.economics.timestepsperyear.value):((i+1)*model.economics.timestepsperyear.value)+1],dx = 1./model.economics.timestepsperyear.value*365.*24.)*1000.*self.utilfactor.value
                 self.NetkWhProduced.value[i] = np.trapz(self.NetElectricityProduced.value[(0+i*model.economics.timestepsperyear.value):((i+1)*model.economics.timestepsperyear.value)+1],dx = 1./model.economics.timestepsperyear.value*365.*24.)*1000.*self.utilfactor.value
@@ -402,9 +402,9 @@ class SurfacePlant:
             for i in range(0,self.plantlifetime.value):
                 self.HeatkWhProduced.value[i] = np.trapz(self.HeatProduced.value[(0+i*model.economics.timestepsperyear.value):((i+1)*model.economics.timestepsperyear.value)+1],dx = 1./model.economics.timestepsperyear.value*365.*24.)*1000.*self.utilfactor.value
 
-        #-------------------------------- 
+        #--------------------------------
         #calculate reservoir heat content
         #--------------------------------
         self.RemainingReservoirHeatContent.value = model.reserv.InitialReservoirHeatContent.value-np.cumsum(self.HeatkWhExtracted.value)*3600*1E3/1E15
-        
+
         model.logger.info("complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
