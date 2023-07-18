@@ -4,3 +4,4 @@ tar -cf $TARFILE README.rst CHANGES pkgdocs.sh demo/*.py doc/*.py \
   `find doc/source -not \( -name .git -prune \) -type f | less`
 
 gzip $TARFILE
+

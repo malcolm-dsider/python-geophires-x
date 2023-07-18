@@ -26,7 +26,6 @@ class GeophiresXClient:
         stash_sys_argv = sys.argv
 
         sys.argv = ['', input_params.as_file_path(), input_params.get_output_file_path()]
-        # geophires.GEOPHIRESv3.main()
         geophires.main()
 
         # Undo the ~unconventional~ things Geophires does.

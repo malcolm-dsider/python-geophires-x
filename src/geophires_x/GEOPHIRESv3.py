@@ -17,11 +17,11 @@ import logging.config
 import geophires_x.Model as Model
 
 def main():
-    # set the starting directory to be the directory that this file is in
+    #set the starting directory to be the directory that this file is in
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-    # set up logging.
-    logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
+    #set up logging.
+    logging.config.fileConfig('logging.conf')
     logger = logging.getLogger('root')
     logger.info("Init " + str(__name__))
 
