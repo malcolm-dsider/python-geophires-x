@@ -42,32 +42,29 @@ Overview
 
 .. end-badges
 
-GEOPHIRES-X python package
+Distributable python package version of GEOPHIRES-X.
+
+Ported from `malcolm-dsider/GEOPHIRES-X<https://github.com/malcolm-dsider/GEOPHIRES-X>`_ using `ionelmc/cookiecutter-pylibrary<https://github.com/ionelmc/cookiecutter-pylibrary/>`_
 
 * Free software: MIT license
 
 Installation
 ============
 
-::
 
-    pip install geophires-x
-
-You can also install the in-development version with::
+Install the in-development version with::
 
     pip install https://github.com/softwareengineerprogrammer/python-geophires-x/archive/main.zip
+
+(Eventually package will be published to PyPi, enabling ``pip install geophires-x``)
+
 
 
 Documentation
 =============
 
 
-To use the project:
-
-.. code-block:: python
-
-    import geophires_x
-    geophires_x.longest()
+See `python-geophires-x-client<https://github.com/softwareengineerprogrammer/python-geophires-x-client>`_ for example usage
 
 
 Development
