@@ -3,13 +3,12 @@ import os
 import sys
 from pathlib import Path
 
-from common import log
-from geophires_input_parameters import EndUseOption
-from geophires_input_parameters import GeophiresInputParameters
-
-# geophires = importlib.import_module('GEOPHIRES-X')
 from geophires_x import GEOPHIRESv3 as geophires
-from geophires_x_result import GeophiresXResult
+
+from .common import log
+from .geophires_input_parameters import EndUseOption
+from .geophires_input_parameters import GeophiresInputParameters
+from .geophires_x_result import GeophiresXResult
 
 
 class GeophiresXClient:

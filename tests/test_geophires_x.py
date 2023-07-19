@@ -1,10 +1,10 @@
 import os.path
 import unittest
 
-from geophires_input_parameters import EndUseOption
-from geophires_input_parameters import GeophiresInputParameters
 from geophires_x_client import GeophiresXClient
-from geophires_x_result import GeophiresXResult
+from geophires_x_client import GeophiresXResult
+from geophires_x_client.geophires_input_parameters import EndUseOption
+from geophires_x_client.geophires_input_parameters import GeophiresInputParameters
 
 
 class GeophiresXTestCase(unittest.TestCase):

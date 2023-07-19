@@ -1,7 +1,7 @@
 import re
 from types import MappingProxyType
 
-from common import log
+from .common import log
 
 
 class GeophiresXResult:
