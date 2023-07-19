@@ -173,10 +173,10 @@ class GeophiresXResult:
         matching_lines = set(filter(lambda line: metadata_marker in line, self._lines))
 
         if len(matching_lines) == 0:
-            log.warn(f'Metadata Field not found: {metadata_field}')
+            log.warning(f'Metadata Field not found: {metadata_field}')
             return None
 
         if len(matching_lines) > 1:
-            log.warn(f'Found multiple ({len(matching_lines)}) entries for metadata field: {metadata_field}\n\t{matching_lines}')
+            log.warning(f'Found multiple ({len(matching_lines)}) entries for metadata field: {metadata_field}\n\t{matching_lines}')
 
         return matching_lines.pop().split(metadata_marker)[1].replace('\n', '')

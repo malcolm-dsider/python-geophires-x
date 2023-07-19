@@ -14,6 +14,8 @@ ignore = [
     "S308", # flake8-bandit suspicious-mark-safe-usage
     "E501", # pycodestyle line-too-long
     "PTH100", # objectively wrong replacement suggested
+    "PTH118",
+    "PTH120",
     "PTH123",
 ]
 line-length = 140

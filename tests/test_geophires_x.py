@@ -129,7 +129,10 @@ class GeophiresXTestCase(unittest.TestCase):
         assert result is not None
 
     def test_geophires_x_result(self):
-        result = GeophiresXResult(os.path.abspath('geophires-result_example-1.out'))
+        test_result_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'geophires-result_example-1.out')
+
+        result = GeophiresXResult(test_result_path)
+
         assert result is not None
         assert result.direct_use_heat_breakeven_price_USD_per_MMBTU == 5.85
 
