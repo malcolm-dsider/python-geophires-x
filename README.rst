@@ -2,6 +2,12 @@
 Overview
 ========
 
+Distributable python package version of GEOPHIRES-X.
+
+Ported from https://github.com/malcolm-dsider/GEOPHIRES-X using https://github.com/ionelmc/cookiecutter-pylibrary/.
+
+* Free software: MIT license
+
 .. start-badges
 
 .. list-table::
@@ -42,12 +48,6 @@ Overview
 
 .. end-badges
 
-Distributable python package version of GEOPHIRES-X.
-
-Ported from [malcolm-dsider/GEOPHIRES-X](https://github.com/malcolm-dsider/GEOPHIRES-X>) using [ionelmc/cookiecutter-pylibrary](https://github.com/ionelmc/cookiecutter-pylibrary/).
-
-* Free software: MIT license
-
 Installation
 ============
 
@@ -56,7 +56,7 @@ Install the in-development version with::
 
     pip install https://github.com/softwareengineerprogrammer/python-geophires-x/archive/main.zip
 
-(Eventually package will be published to PyPi, enabling `pip install geophires-x`)
+(Eventually package will be published to PyPi, enabling ``pip install geophires-x``)
 
 
 
@@ -64,7 +64,7 @@ Documentation
 =============
 
 
-See [python-geophires-x-client](https://github.com/softwareengineerprogrammer/python-geophires-x-client) for example usage
+See https://github.com/softwareengineerprogrammer/python-geophires-x-client for example usage
 
 
 Development
