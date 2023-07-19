@@ -128,13 +128,26 @@ class GeophiresXTestCase(unittest.TestCase):
 
         assert result is not None
 
-    def test_geophires_x_result(self):
-        test_result_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'geophires-result_example-1.out')
+    def test_geophires_x_result_1(self):
+        test_result_path = self._get_test_file_path('geophires-result_example-1.out')
 
         result = GeophiresXResult(test_result_path)
 
         assert result is not None
-        assert result.direct_use_heat_breakeven_price_USD_per_MMBTU == 5.85
+
+        expected_price = 5.85
+
+        assert result.direct_use_heat_breakeven_price_USD_per_MMBTU == expected_price
+        assert result.result['SUMMARY OF RESULTS']['Direct-Use heat breakeven price']['value'] == expected_price
+        assert result.result['SUMMARY OF RESULTS']['Direct-Use heat breakeven price']['unit'] == 'USD/MMBTU'
+
+    def test_geophires_x_result_2(self):
+        test_result_path = self._get_test_file_path('geophires-result_example-2.out')
+        result = GeophiresXResult(test_result_path)
+
+        assert result is not None
+        assert result.direct_use_heat_breakeven_price_USD_per_MMBTU is None
+        assert result.result['SUMMARY OF RESULTS']['Average Net Electricity Production']['value'] == 1.22
 
     def test_input_hashing(self):
         input1 = GeophiresInputParameters(
@@ -152,3 +165,6 @@ class GeophiresXTestCase(unittest.TestCase):
         )
 
         assert hash(input1) != hash(input3)
+
+    def _get_test_file_path(self, test_file_name):
+        return os.path.join(os.path.abspath(os.path.dirname(__file__)), test_file_name)

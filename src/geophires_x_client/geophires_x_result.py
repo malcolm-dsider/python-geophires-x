@@ -10,6 +10,8 @@ class GeophiresXResult:
             'SUMMARY OF RESULTS': [
                 # TODO uses colon delimiter inconsistently
                 #'End-Use Option',
+                'Average Net Electricity Production',
+                'Electricity breakeven price',
                 'Average Direct-Use Heat Production',
                 'Direct-Use heat breakeven price',
                 'Number of production wells',
@@ -19,29 +21,35 @@ class GeophiresXResult:
                 'Geothermal gradient',
             ],
             'ECONOMIC PARAMETERS': [
-                'Interest Rate',
+                'Interest Rate',  # %
                 'Accrued financing during construction',
                 'Project lifetime',
                 'Capacity factor',
-            ],  # %  # %
+            ],
             'ENGINEERING PARAMETERS': [
-                'Well depth',
+                'Number of Production Wells',
+                'Number of Injection Wells',
+                'Well depth (or total length, if not vertical)',
                 'Water loss rate',  # %
                 'Pump efficiency',  # %
                 'Injection temperature',
                 'Average production well temperature drop',
                 'Flowrate per production well',
                 'Injection well casing ID',
-                'Produciton well casing ID',  # TODO correct typo upstream
+                'Production well casing ID',  # TODO correct typo upstream
                 'Number of times redrilling',
+                # 'Power plant type', # Not a number - TODO parse non-number values without throwing exception
             ],
             'RESOURCE CHARACTERISTICS': ['Maximum reservoir temperature', 'Number of segments', 'Geothermal gradient'],
             'RESERVOIR PARAMETERS': [
+                # TODO 'Reservoir Model = 1-D Linear Heat Sweep Model'
+                # TODO 'Fracture model = Rectangular'
                 # TODO moved to power generation profile, parse from there
                 #  'Annual Thermal Drawdown (%/year)',
                 'Bottom-hole temperature',
-                'Well seperation: fracture diameter',  # TODO correct typo upstream
+                'Well seperation: fracture height',  # TODO correct typo upstream
                 'Fracture area',
+                'Fracture width',
                 'Reservoir volume',
                 'Reservoir hydrostatic pressure',
                 'Plant outlet pressure',
@@ -51,6 +59,7 @@ class GeophiresXResult:
                 'Reservoir density',
                 'Reservoir thermal conductivity',
                 'Reservoir heat capacity',
+                'Reservoir porosity',
             ],
             'RESERVOIR SIMULATION RESULTS': [
                 'Maximum Production Temperature',
@@ -58,6 +67,7 @@ class GeophiresXResult:
                 'Minimum Production Temperature',
                 'Initial Production Temperature',
                 'Average Reservoir Heat Extraction',
+                # TODO 'Production Wellbore Heat Transmission Model = Ramey Model'
                 'Average Production Well Temperature Drop',
                 'Average Injection Well Pump Pressure Drop',
                 'Average Production Well Pump Pressure Drop',
@@ -87,6 +97,17 @@ class GeophiresXResult:
             #     'Average production well pump pressure drop (kPa)'
             # ]
             'SURFACE EQUIPMENT SIMULATION RESULTS': [
+                'Initial geofluid availability',
+                'Maximum Total Electricity Generation',
+                'Average Total Electricity Generation',
+                'Minimum Total Electricity Generation',
+                'Initial Total Electricity Generation',
+                'Maximum Net Electricity Generation',
+                'Average Net Electricity Generation',
+                'Minimum Net Electricity Generation',
+                'Initial Net Electricity Generation',
+                'Average Annual Total Electricity Generation',
+                'Average Annual Net Electricity Generation',
                 'Maximum Net Heat Production',
                 'Average Net Heat Production',
                 'Minimum Net Heat Production',
@@ -129,9 +150,10 @@ class GeophiresXResult:
 
     @property
     def direct_use_heat_breakeven_price_USD_per_MMBTU(self):
-        try:
-            return self.result['SUMMARY OF RESULTS']['Direct-Use heat breakeven price']['value']
-        except KeyError:
+        summary = self.result['SUMMARY OF RESULTS']
+        if 'Direct-Use heat breakeven price' in summary and summary['Direct-Use heat breakeven price'] is not None:
+            return summary['Direct-Use heat breakeven price']['value']
+        else:
             return None
 
     def _get_result_field(self, field):
@@ -151,7 +173,7 @@ class GeophiresXResult:
         str_val = val_and_unit_tuple[0]
 
         unit = None
-        if len(val_and_unit_str) == 2:
+        if len(val_and_unit_tuple) == 2:
             unit = val_and_unit_tuple[1]
         elif field.startswith('Number'):
             unit = 'count'
