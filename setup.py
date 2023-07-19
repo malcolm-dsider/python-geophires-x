@@ -71,7 +71,8 @@ setup(
         'deepdiff',
         'mysql.connector',
         'cryptography',
-        'h5py',
+        # Used by Adv*/AGS extensions but break tox pypy jobs
+        #'h5py',
         #'scipy',
     ],
     extras_require={
