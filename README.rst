@@ -64,7 +64,7 @@ Documentation
 =============
 
 
-See https://github.com/softwareengineerprogrammer/python-geophires-x-client for example usage
+See https://github.com/softwareengineerprogrammer/python-geophires-x/blob/main/tests/test_geophires_x.py for example usage
 
 
 Development
