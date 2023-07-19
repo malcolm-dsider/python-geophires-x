@@ -15,7 +15,7 @@ setup(
     name='geophires-x',
     version='0.1.3',
     license='MIT',
-    description='GEOPHIRES-X python package',
+    description='Distributable python package version of https://github.com/malcolm-dsider/GEOPHIRES-X',
     long_description='{}\n{}'.format(
         re.compile('^.. start-badges.*^.. end-badges', re.M | re.S).sub('', read('README.rst')),
         re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst')),
@@ -61,7 +61,19 @@ setup(
         # eg: "keyword1", "keyword2", "keyword3",
     ],
     python_requires='>=3.7',
-    install_requires=['numpy', 'numpy-financial', 'pint', 'forex_python', 'jsons', 'mpmath', 'deepdiff', 'mysql.connector'],
+    install_requires=[
+        'numpy',
+        'numpy-financial',
+        'pint',
+        'forex_python',
+        'jsons',
+        'mpmath',
+        'deepdiff',
+        'mysql.connector',
+        'cryptography',
+        'h5py',
+        'scipy',
+    ],
     extras_require={
         # eg:
         #   "rst": ["docutils>=0.11"],
