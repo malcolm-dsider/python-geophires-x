@@ -9,7 +9,7 @@ class GeophiresXResult:
         {
             'SUMMARY OF RESULTS': [
                 # TODO uses colon delimiter inconsistently
-                #'End-Use Option',
+                # 'End-Use Option',
                 'Average Net Electricity Production',
                 'Electricity breakeven price',
                 'Average Direct-Use Heat Production',
@@ -119,7 +119,7 @@ class GeophiresXResult:
     )
 
     _METADATA_FIELDS = (
-        #'End-Use Option',
+        # 'End-Use Option',
         'Economic Model',
         'Reservoir Model',
     )
@@ -149,6 +149,9 @@ class GeophiresXResult:
             self.result['metadata'][metadata_field] = self._get_metadata_field(metadata_field)
 
         self.result['POWER GENERATION PROFILE'] = self._get_power_generation_profile()
+        self.result[
+            'HEAT AND/OR ELECTRICITY EXTRACTION AND GENERATION PROFILE'
+        ] = self._get_heat_electricity_extraction_generation_profile()
 
     @property
     def direct_use_heat_breakeven_price_USD_per_MMBTU(self):
@@ -180,17 +183,7 @@ class GeophiresXResult:
         elif field.startswith('Number'):
             unit = 'count'
 
-        def number(number_str):
-            try:
-                if '.' in number_str:
-                    return float(number_str)
-                else:
-                    return int(number_str)
-            except TypeError:
-                log.error(f'Unable to parse field "{field}" as number: {number_str}')
-                return None
-
-        return {'value': number(str_val), 'unit': unit}
+        return {'value': self._parse_number(str_val, field=f'field "{field}"'), 'unit': unit}
 
     def _get_metadata_field(self, metadata_field):
         metadata_marker = f'{metadata_field} = '
@@ -225,3 +218,33 @@ class GeophiresXResult:
         data = [data_headers]
         data.extend(filter(lambda entry: len(entry) > 1, [re.split(r'\s+', line)[1:] for line in profile_lines]))
         return data
+
+    @property
+    def heat_electricity_extraction_generation_profile(self):
+        return self.result['HEAT AND/OR ELECTRICITY EXTRACTION AND GENERATION PROFILE']
+
+    def _get_heat_electricity_extraction_generation_profile(self):
+        s1 = '*  HEAT AND/OR ELECTRICITY EXTRACTION AND GENERATION PROFILE  *'
+        profile_lines = ''.join(self._lines).split(s1)[1].split('\n')[5:]
+
+        data_headers = [
+            'YEAR',
+            'ELECTRICITY PROVIDED (GWh/year)',
+            'HEAT EXTRACTED (GWh/year)',
+            'RESERVOIR HEAT CONTENT (10^15 J)',
+            'PERCENTAGE OF TOTAL HEAT MINED (%)',
+        ]
+        data = [data_headers]
+        str_entries = filter(lambda entry: len(entry) > 1, [re.split(r'\s+', line)[1:] for line in profile_lines])
+        data.extend([self._parse_number(str_entry) for str_entry in x] for x in str_entries)
+        return data
+
+    def _parse_number(self, number_str, field='string'):
+        try:
+            if '.' in number_str:
+                return float(number_str)
+            else:
+                return int(number_str)
+        except TypeError:
+            log.error(f'Unable to parse {field} as number: {number_str}')
+            return None
