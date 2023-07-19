@@ -27,7 +27,7 @@ class GeophiresInputParameters:
 
         # TODO validate params
 
-        self._id = hash(frozenset(self.params.items()))
+        self._id = abs(hash(frozenset(self.params.items())))
 
     def as_file_path(self):
         tmp_file_path = Path(tempfile.gettempdir(), f'geophires-input-params_{self._id}.txt')
