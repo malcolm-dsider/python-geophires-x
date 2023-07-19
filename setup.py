@@ -72,7 +72,7 @@ setup(
         'mysql.connector',
         'cryptography',
         'h5py',
-        'scipy',
+        #'scipy',
     ],
     extras_require={
         # eg:
