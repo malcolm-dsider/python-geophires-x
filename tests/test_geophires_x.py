@@ -149,6 +149,13 @@ class GeophiresXTestCase(unittest.TestCase):
         assert result.direct_use_heat_breakeven_price_USD_per_MMBTU is None
         assert result.result['SUMMARY OF RESULTS']['Average Net Electricity Production']['value'] == 1.22
 
+    def test_geophires_x_result_power_generation_profile(self):
+        test_result_path = self._get_test_file_path('geophires-result_example-2.out')
+        result = GeophiresXResult(test_result_path)
+
+        assert result.power_generation_profile is not None
+        assert len(result.power_generation_profile) == 36
+
     def test_input_hashing(self):
         input1 = GeophiresInputParameters(
             {'End-Use Option': EndUseOption.DIRECT_USE_HEAT.value, 'Gradient 1': 50, 'Maximum Temperature': 250}

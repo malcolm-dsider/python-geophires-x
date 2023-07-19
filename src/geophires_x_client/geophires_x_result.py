@@ -148,6 +148,8 @@ class GeophiresXResult:
         for metadata_field in GeophiresXResult._METADATA_FIELDS:
             self.result['metadata'][metadata_field] = self._get_metadata_field(metadata_field)
 
+        self.result['POWER GENERATION PROFILE'] = self._get_power_generation_profile()
+
     @property
     def direct_use_heat_breakeven_price_USD_per_MMBTU(self):
         summary = self.result['SUMMARY OF RESULTS']
@@ -202,3 +204,24 @@ class GeophiresXResult:
             log.warning(f'Found multiple ({len(matching_lines)}) entries for metadata field: {metadata_field}\n\t{matching_lines}')
 
         return matching_lines.pop().split(metadata_marker)[1].replace('\n', '')
+
+    @property
+    def power_generation_profile(self):
+        return self.result['POWER GENERATION PROFILE']
+
+    def _get_power_generation_profile(self):
+        s1 = '*  POWER GENERATION PROFILE  *'
+        s2 = '***************************************************************'
+        profile_lines = ''.join(self._lines).split(s1)[1].split(s2)[0].split('\n')[5:]
+
+        data_headers = [
+            'YEAR',
+            'THERMAL DRAWDOWN',
+            'GEOFLUID TEMPERATURE (degC)',
+            'PUMP POWER (MW)',
+            'NET POWER (MW)',
+            'FIRST LAW EFFICIENCY (%)',
+        ]
+        data = [data_headers]
+        data.extend(filter(lambda entry: len(entry) > 1, [re.split(r'\s+', line)[1:] for line in profile_lines]))
+        return data
