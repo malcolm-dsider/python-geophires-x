@@ -11,6 +11,8 @@ include .github/workflows/github-actions.yml
 include pytest.ini
 include tox.ini
 
+include .pre-commit-config.yaml
+
 include AUTHORS.rst
 include CHANGELOG.rst
 include CONTRIBUTING.rst
