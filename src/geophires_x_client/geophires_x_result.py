@@ -211,7 +211,8 @@ class GeophiresXResult:
             'FIRST LAW EFFICIENCY (%)',
         ]
         data = [data_headers]
-        data.extend(filter(lambda entry: len(entry) > 1, [re.split(r'\s+', line)[1:] for line in profile_lines]))
+        str_entries = filter(lambda entry: len(entry) > 1, [re.split(r'\s+', line)[1:] for line in profile_lines])
+        data.extend([self._parse_number(str_entry) for str_entry in x] for x in str_entries)
         return data
 
     @property

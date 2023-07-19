@@ -157,6 +157,7 @@ class GeophiresXTestCase(unittest.TestCase):
 
         assert result.power_generation_profile is not None
         assert len(result.power_generation_profile) == 36
+        assert result.power_generation_profile[1] == [1, 1.0, 179.56, 0.0, 3.7597, 11.41]
 
         assert result.heat_electricity_extraction_generation_profile is not None
         assert len(result.heat_electricity_extraction_generation_profile) == 36
