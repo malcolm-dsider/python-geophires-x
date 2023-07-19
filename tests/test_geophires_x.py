@@ -8,7 +8,7 @@ from geophires_x_client.geophires_input_parameters import GeophiresInputParamete
 
 
 class GeophiresXTestCase(unittest.TestCase):
-    def test_geophires_x(self):
+    def test_geophires_x_end_use_direct_use_heat(self):
         client = GeophiresXClient()
         result = client.get_geophires_result(
             GeophiresInputParameters(
@@ -25,6 +25,7 @@ class GeophiresXTestCase(unittest.TestCase):
         )
 
         assert result is not None
+        assert result.result['metadata']['End-Use Option'] == 'DIRECT_USE_HEAT'
 
         result_same_input = client.get_geophires_result(
             GeophiresInputParameters(
@@ -61,6 +62,7 @@ class GeophiresXTestCase(unittest.TestCase):
         )
 
         assert result is not None
+        assert result.result['metadata']['End-Use Option'] == 'ELECTRICITY'
 
     def test_reservoir_model_2(self):
         client = GeophiresXClient()

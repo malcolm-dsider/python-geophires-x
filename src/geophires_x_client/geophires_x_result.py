@@ -2,6 +2,7 @@ import re
 from types import MappingProxyType
 
 from .common import log
+from .geophires_input_parameters import EndUseOption
 
 
 class GeophiresXResult:
@@ -89,13 +90,6 @@ class GeophiresXResult:
                 'Average annual pumping costs',
                 'Total operating and maintenance costs',
             ],
-            # 'POWER GENERATION RESULTS': [
-            #     'Initial direct-use heat production (MWth)',
-            #     'Average direct-use heat production (MWth)',
-            #     'Average annual heat production (GWh/yr)',
-            #     'Average injection well pump pressure drop (kPa)',
-            #     'Average production well pump pressure drop (kPa)'
-            # ]
             'SURFACE EQUIPMENT SIMULATION RESULTS': [
                 'Initial geofluid availability',
                 'Maximum Total Electricity Generation',
@@ -132,8 +126,6 @@ class GeophiresXResult:
         f.close()
 
         # TODO generic-er result value map
-        # TODO Power generation profile
-        # TODO "HEAT AND/OR ELECTRICITY EXTRACTION AND GENERATION PROFILE"
 
         self.result = {}
         for category_fields in GeophiresXResult._RESULT_FIELDS_BY_CATEGORY.items():
@@ -152,6 +144,9 @@ class GeophiresXResult:
         self.result[
             'HEAT AND/OR ELECTRICITY EXTRACTION AND GENERATION PROFILE'
         ] = self._get_heat_electricity_extraction_generation_profile()
+
+        if self._get_end_use_option() is not None:
+            self.result['metadata']['End-Use Option'] = self._get_end_use_option().name
 
     @property
     def direct_use_heat_breakeven_price_USD_per_MMBTU(self):
@@ -227,9 +222,15 @@ class GeophiresXResult:
         s1 = '*  HEAT AND/OR ELECTRICITY EXTRACTION AND GENERATION PROFILE  *'
         profile_lines = ''.join(self._lines).split(s1)[1].split('\n')[5:]
 
+        provided_resource_options = {EndUseOption.DIRECT_USE_HEAT: 'HEAT', EndUseOption.ELECTRICITY: 'ELECTRICITY'}
+        provided_resource = 'HEAT AND/OR ELECTRICITY'
+
+        if self._get_end_use_option() in provided_resource_options:
+            provided_resource = provided_resource_options[self._get_end_use_option()]
+
         data_headers = [
             'YEAR',
-            'ELECTRICITY PROVIDED (GWh/year)',
+            f'{provided_resource} PROVIDED (GWh/year)',
             'HEAT EXTRACTED (GWh/year)',
             'RESERVOIR HEAT CONTENT (10^15 J)',
             'PERCENTAGE OF TOTAL HEAT MINED (%)',
@@ -248,3 +249,12 @@ class GeophiresXResult:
         except TypeError:
             log.error(f'Unable to parse {field} as number: {number_str}')
             return None
+
+    def _get_end_use_option(self) -> EndUseOption:
+        end_use_option_snippet = list(filter(lambda x: 'End-Use Option: ' in x, self._lines))[0].split('End-Use Option: ')[1]
+        if 'Direct-Use Heat' in end_use_option_snippet:
+            return EndUseOption.DIRECT_USE_HEAT
+        elif 'Electricity' in end_use_option_snippet:
+            return EndUseOption.ELECTRICITY
+
+        return None
