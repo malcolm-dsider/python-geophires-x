@@ -20,9 +20,6 @@ class PowerPlantType(Enum):
 
 class GeophiresInputParameters:
     def __init__(self, params):
-        # TODO probably better if stable hash of params
-        # self._id = str(uuid1())
-
         self.params = dict(params)
 
         # TODO validate params

@@ -136,14 +136,14 @@ class GeophiresXResult:
             for field in fields:
                 self.result[category][field] = self._get_result_field(field)
 
-        self.result['metadata'] = {'output_file_path': self.output_file_path}
-        for metadata_field in GeophiresXResult._METADATA_FIELDS:
-            self.result['metadata'][metadata_field] = self._get_metadata_field(metadata_field)
-
         self.result['POWER GENERATION PROFILE'] = self._get_power_generation_profile()
         self.result[
             'HEAT AND/OR ELECTRICITY EXTRACTION AND GENERATION PROFILE'
         ] = self._get_heat_electricity_extraction_generation_profile()
+
+        self.result['metadata'] = {'output_file_path': self.output_file_path}
+        for metadata_field in GeophiresXResult._METADATA_FIELDS:
+            self.result['metadata'][metadata_field] = self._get_metadata_field(metadata_field)
 
         if self._get_end_use_option() is not None:
             self.result['metadata']['End-Use Option'] = self._get_end_use_option().name
