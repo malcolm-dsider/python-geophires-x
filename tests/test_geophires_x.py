@@ -157,10 +157,25 @@ class GeophiresXTestCase(unittest.TestCase):
 
         assert result.power_generation_profile is not None
         assert len(result.power_generation_profile) == 36
+        assert result.power_generation_profile[0] == [
+            'YEAR',
+            'THERMAL DRAWDOWN',
+            'GEOFLUID TEMPERATURE (degC)',
+            'PUMP POWER (MW)',
+            'NET POWER (MW)',
+            'FIRST LAW EFFICIENCY (%)',
+        ]
         assert result.power_generation_profile[1] == [1, 1.0, 179.56, 0.0, 3.7597, 11.41]
 
         assert result.heat_electricity_extraction_generation_profile is not None
         assert len(result.heat_electricity_extraction_generation_profile) == 36
+        assert result.heat_electricity_extraction_generation_profile[0] == [
+            'YEAR',
+            'ELECTRICITY PROVIDED (GWh/year)',
+            'HEAT EXTRACTED (GWh/year)',
+            'RESERVOIR HEAT CONTENT (10^15 J)',
+            'PERCENTAGE OF TOTAL HEAT MINED (%)',
+        ]
         assert result.heat_electricity_extraction_generation_profile[1] == [1, 30.3, 262.8, 35.53, 2.59]
         assert result.heat_electricity_extraction_generation_profile[-1] == [35, 1.7, 86.8, 16.72, 54.15]
 

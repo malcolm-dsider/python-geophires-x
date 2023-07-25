@@ -200,20 +200,8 @@ class GeophiresXResult:
     def _get_power_generation_profile(self):
         s1 = '*  POWER GENERATION PROFILE  *'
         s2 = '***************************************************************'
-        profile_lines = ''.join(self._lines).split(s1)[1].split(s2)[0].split('\n')[5:]
-
-        data_headers = [
-            'YEAR',
-            'THERMAL DRAWDOWN',
-            'GEOFLUID TEMPERATURE (degC)',
-            'PUMP POWER (MW)',
-            'NET POWER (MW)',
-            'FIRST LAW EFFICIENCY (%)',
-        ]
-        data = [data_headers]
-        str_entries = filter(lambda entry: len(entry) > 1, [re.split(r'\s+', line)[1:] for line in profile_lines])
-        data.extend([self._parse_number(str_entry) for str_entry in x] for x in str_entries)
-        return data
+        profile_lines = ''.join(self._lines).split(s1)[1].split(s2)[0].split('\n')  # [5:]
+        return self._get_data_from_profile_lines(profile_lines)
 
     @property
     def heat_electricity_extraction_generation_profile(self):
@@ -221,23 +209,32 @@ class GeophiresXResult:
 
     def _get_heat_electricity_extraction_generation_profile(self):
         s1 = '*  HEAT AND/OR ELECTRICITY EXTRACTION AND GENERATION PROFILE  *'
-        profile_lines = ''.join(self._lines).split(s1)[1].split('\n')[5:]
+        profile_lines = ''.join(self._lines).split(s1)[1].split('\n')
+        return self._get_data_from_profile_lines(profile_lines)
 
-        provided_resource_options = {EndUseOption.DIRECT_USE_HEAT: 'HEAT', EndUseOption.ELECTRICITY: 'ELECTRICITY'}
-        provided_resource = 'HEAT AND/OR ELECTRICITY'
+    def _get_data_from_profile_lines(self, profile_lines):
+        data_lines = profile_lines[5:]
 
-        if self._get_end_use_option() in provided_resource_options:
-            provided_resource = provided_resource_options[self._get_end_use_option()]
+        header_lines = profile_lines[2:5]
+        data_headers = None
+        for idx, header_line in enumerate(header_lines):
+            cols = re.split(r'\s\s+', header_line)[1:]
 
-        data_headers = [
-            'YEAR',
-            f'{provided_resource} PROVIDED (GWh/year)',
-            'HEAT EXTRACTED (GWh/year)',
-            'RESERVOIR HEAT CONTENT (10^15 J)',
-            'PERCENTAGE OF TOTAL HEAT MINED (%)',
-        ]
+            if idx == 0:
+                data_headers = [''] * len(cols)
+
+            for idxc, col in enumerate(cols):
+                data_header_idx = idxc
+                if data_headers[0] == 'YEAR' and idx > 0 and idxc >= 0:
+                    data_header_idx += 1
+
+                if data_headers[1] == 'THERMAL DRAWDOWN' and idx > 1:  # and idxc > 0:
+                    data_header_idx += 1
+
+                data_headers[data_header_idx] = f'{data_headers[data_header_idx]} {col.strip()}'.lstrip()
+
         data = [data_headers]
-        str_entries = filter(lambda entry: len(entry) > 1, [re.split(r'\s+', line)[1:] for line in profile_lines])
+        str_entries = filter(lambda entry: len(entry) > 1, [re.split(r'\s+', line)[1:] for line in data_lines])
         data.extend([self._parse_number(str_entry) for str_entry in x] for x in str_entries)
         return data
 
