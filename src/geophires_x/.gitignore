@@ -107,7 +107,10 @@ Examples\Greenfire.txt
 Examples\NASCC.Json
 Examples\NASCC.txt
 Examples\OneValue.Json
-Examples\ReservoirOutput.txt
+
+# TODO this shouldn't be ignored, it's consumed in unit test
+#Examples\ReservoirOutput.txt
+
 Examples\Test.Json
 Examples\Test2.json
 /.idea/workspace.xml
