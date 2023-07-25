@@ -169,7 +169,7 @@ class GeophiresXResult:
 
         matching_line = matching_lines.pop()
         val_and_unit_str = re.sub(r'\s\s+', '', matching_line.replace(f'{field}:', '').replace('\n', ''))
-        val_and_unit_tuple = val_and_unit_str.split(' ')
+        val_and_unit_tuple = val_and_unit_str.strip().split(' ')
         str_val = val_and_unit_tuple[0]
 
         unit = None

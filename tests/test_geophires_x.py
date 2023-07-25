@@ -1,5 +1,6 @@
 import os.path
 import unittest
+from pathlib import Path
 
 from geophires_x_client import GeophiresXClient
 from geophires_x_client import GeophiresXResult
@@ -8,6 +9,8 @@ from geophires_x_client.geophires_input_parameters import GeophiresInputParamete
 
 
 class GeophiresXTestCase(unittest.TestCase):
+    maxDiff = None
+
     def test_geophires_x_end_use_direct_use_heat(self):
         client = GeophiresXClient()
         result = client.get_geophires_result(
@@ -179,6 +182,25 @@ class GeophiresXTestCase(unittest.TestCase):
         assert result.heat_electricity_extraction_generation_profile[1] == [1, 30.3, 262.8, 35.53, 2.59]
         assert result.heat_electricity_extraction_generation_profile[-1] == [35, 1.7, 86.8, 16.72, 54.15]
 
+    def test_geophires_examples(self):
+        client = GeophiresXClient()
+        example_files = self._list_test_files_dir(test_files_dir='examples')
+
+        def get_output_file_for_example(example_file: str):
+            return self._get_test_file_path(Path('examples', f'{example_file.split(".txt")[0].capitalize()}V3_output.txt'))
+
+        for example_file_path in example_files:
+            if example_file_path.startswith('example') and '_output' not in example_file_path:
+                input_params = GeophiresInputParameters(from_file_path=self._get_test_file_path(Path('examples', example_file_path)))
+
+                geophires_result: GeophiresXResult = client.get_geophires_result(input_params)
+                del geophires_result.result['metadata']
+
+                expected_result: GeophiresXResult = GeophiresXResult(get_output_file_for_example(example_file_path))
+                del expected_result.result['metadata']
+
+                self.assertDictEqual(geophires_result.result, expected_result.result)
+
     def test_input_hashing(self):
         input1 = GeophiresInputParameters(
             {'End-Use Option': EndUseOption.DIRECT_USE_HEAT.value, 'Gradient 1': 50, 'Maximum Temperature': 250}
@@ -198,3 +220,10 @@ class GeophiresXTestCase(unittest.TestCase):
 
     def _get_test_file_path(self, test_file_name):
         return os.path.join(os.path.abspath(os.path.dirname(__file__)), test_file_name)
+
+    def _get_test_file_content(self, test_file_name):
+        with open(self._get_test_file_path(test_file_name)) as f:
+            return f.readlines()
+
+    def _list_test_files_dir(self, test_files_dir: str):
+        return os.listdir(self._get_test_file_path(test_files_dir))

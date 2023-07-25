@@ -25,7 +25,12 @@ class GeophiresXClient:
         stash_sys_argv = sys.argv
 
         sys.argv = ['', input_params.as_file_path(), input_params.get_output_file_path()]
-        geophires.main()
+        try:
+            geophires.main()
+        except Exception as e:
+            raise RuntimeError('GEOPHIRES encountered an exception') from e
+        except SystemExit:
+            raise RuntimeError('GEOPHIRES exited') from None
 
         # Undo the ~unconventional~ things Geophires does.
         sys.argv = stash_sys_argv
