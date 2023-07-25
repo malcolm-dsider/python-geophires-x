@@ -17,6 +17,7 @@ ignore = [
     "PTH118",
     "PTH120",
     "PTH123",
+    "PT009",
 ]
 line-length = 140
 select = [
