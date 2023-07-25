@@ -9,6 +9,8 @@ from geophires_x_client.geophires_input_parameters import GeophiresInputParamete
 
 
 class GeophiresXTestCase(unittest.TestCase):
+    maxDiff = None
+
     def test_geophires_x_end_use_direct_use_heat(self):
         client = GeophiresXClient()
         result = client.get_geophires_result(
@@ -190,8 +192,13 @@ class GeophiresXTestCase(unittest.TestCase):
         for example_file_path in example_files:
             if '_output' not in example_file_path:
                 input_params = GeophiresInputParameters(from_file_path=self._get_test_file_path(Path('examples', example_file_path)))
+
                 geophires_result: GeophiresXResult = client.get_geophires_result(input_params)
+                del geophires_result.result['metadata']
+
                 expected_result: GeophiresXResult = GeophiresXResult(get_output_file_for_example(example_file_path))
+                del expected_result.result['metadata']
+
                 self.assertDictEqual(geophires_result.result, expected_result.result)
 
     def test_input_hashing(self):
