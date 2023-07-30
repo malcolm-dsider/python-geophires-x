@@ -8,6 +8,7 @@ from geophires_x_client.geophires_input_parameters import EndUseOption
 from geophires_x_client.geophires_input_parameters import GeophiresInputParameters
 
 
+# noinspection PyTypeChecker
 class GeophiresXTestCase(unittest.TestCase):
     maxDiff = None
 
@@ -191,15 +192,16 @@ class GeophiresXTestCase(unittest.TestCase):
 
         for example_file_path in example_files:
             if example_file_path.startswith('example') and '_output' not in example_file_path:
-                input_params = GeophiresInputParameters(from_file_path=self._get_test_file_path(Path('examples', example_file_path)))
+                with self.subTest(msg=example_file_path):
+                    input_params = GeophiresInputParameters(from_file_path=self._get_test_file_path(Path('examples', example_file_path)))
 
-                geophires_result: GeophiresXResult = client.get_geophires_result(input_params)
-                del geophires_result.result['metadata']
+                    geophires_result: GeophiresXResult = client.get_geophires_result(input_params)
+                    del geophires_result.result['metadata']
 
-                expected_result: GeophiresXResult = GeophiresXResult(get_output_file_for_example(example_file_path))
-                del expected_result.result['metadata']
+                    expected_result: GeophiresXResult = GeophiresXResult(get_output_file_for_example(example_file_path))
+                    del expected_result.result['metadata']
 
-                self.assertDictEqual(geophires_result.result, expected_result.result)
+                    self.assertDictEqual(geophires_result.result, expected_result.result)
 
     def test_input_hashing(self):
         input1 = GeophiresInputParameters(
