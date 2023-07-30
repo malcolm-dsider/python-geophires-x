@@ -20,11 +20,6 @@ import shutil
 import subprocess
 import multiprocessing
 
-#set up logging.
-logging.config.fileConfig('logging.conf')
-logger = logging.getLogger('root')
-logger.info("Init " + str(__name__))
-
 def convert_string_to_number(test_string):
     # Initialize a translation table to remove non-numeric characters
     translation_table = str.maketrans('', '', 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-/:;<=>?@[\\]^_`{|}~')
@@ -56,7 +51,7 @@ def main():
     #                  If it is the same, do nothing. If it is not, report it.
     #            For values in a table, the search string is the name of the table, followed by a comma, then the number of lines to skip to get to the value you want to validate, then a comma,
     #                 then the column number that contains the value you want to compare.
-    #       e.g., 
+    #       e.g.,
     #       Average Net Electricity Production
     #       Electricity breakeven price|LCOE
     #       Average Production Temperature
@@ -162,7 +157,7 @@ def main():
                         else:
                             if result_value is None: f2.write(search_string + " not found in: " + output_result_file + "\n")
                             if precompute_value is None: f2.write(pc_search_string + " not found in: " + Precomputed_results_file + "\n")
-                    
+
                     #if len(pair) is 3, then we have a entry that wants to compare values from a table
                     elif len(pair) == 3:
                         pc_search_string = search_string = pair[0]
@@ -232,5 +227,11 @@ def main():
 
     logger.info("Complete "+ str(__name__) + ": " + sys._getframe().f_code.co_name)
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    # set up logging.
+    logging.config.fileConfig('logging.conf')
+    logger = logging.getLogger('root')
+    logger.info("Init " + str(__name__))
+
+    main()
 

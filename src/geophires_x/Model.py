@@ -13,7 +13,7 @@ class Model(object):
     Model is the container class of the application, giving access to everything else, including the logger
     """
 
-    def __init__(self):
+    def __init__(self, enable_geophires_logging_config=True):
         """
         The __init__ function is called automatically every time the class is being used to create a new object.
 
@@ -23,10 +23,14 @@ class Model(object):
         :return: Nothing
         :doc-author: Malcolm Ross
         """
-        #get logging started
-        logging.config.fileConfig('logging.conf')
+
+        # get logging started
         self.logger = logging.getLogger('root')
-        self.logger.setLevel(logging.INFO)
+
+        if enable_geophires_logging_config:
+            logging.config.fileConfig('logging.conf')
+            self.logger.setLevel(logging.INFO)
+
         self.logger.info("Init " + str(__class__) + ": " + sys._getframe().f_code.co_name)
 
         #keep track of execution time

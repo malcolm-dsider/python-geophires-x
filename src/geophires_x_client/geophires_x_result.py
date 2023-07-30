@@ -1,7 +1,7 @@
 import re
 from types import MappingProxyType
 
-from .common import log
+from .common import _get_logger
 from .geophires_input_parameters import EndUseOption
 
 
@@ -118,7 +118,8 @@ class GeophiresXResult:
         'Reservoir Model',
     )
 
-    def __init__(self, output_file_path):
+    def __init__(self, output_file_path, logger_name='root'):
+        self._logger = _get_logger(logger_name)
         self.output_file_path = output_file_path
 
         f = open(self.output_file_path)
@@ -161,11 +162,11 @@ class GeophiresXResult:
         matching_lines = set(filter(lambda line: f'  {field}:  ' in line, self._lines))
 
         if len(matching_lines) == 0:
-            log.warning(f'Field not found: {field}')
+            self._logger.warning(f'Field not found: {field}')
             return None
 
         if len(matching_lines) > 1:
-            log.warning(f'Found multiple ({len(matching_lines)}) entries for field: {field}\n\t{matching_lines}')
+            self._logger.warning(f'Found multiple ({len(matching_lines)}) entries for field: {field}\n\t{matching_lines}')
 
         matching_line = matching_lines.pop()
         val_and_unit_str = re.sub(r'\s\s+', '', matching_line.replace(f'{field}:', '').replace('\n', ''))
@@ -185,11 +186,11 @@ class GeophiresXResult:
         matching_lines = set(filter(lambda line: metadata_marker in line, self._lines))
 
         if len(matching_lines) == 0:
-            log.warning(f'Metadata Field not found: {metadata_field}')
+            self._logger.warning(f'Metadata Field not found: {metadata_field}')
             return None
 
         if len(matching_lines) > 1:
-            log.warning(f'Found multiple ({len(matching_lines)}) entries for metadata field: {metadata_field}\n\t{matching_lines}')
+            self._logger.warning(f'Found multiple ({len(matching_lines)}) entries for metadata field: {metadata_field}\n\t{matching_lines}')
 
         return matching_lines.pop().split(metadata_marker)[1].replace('\n', '')
 
@@ -245,7 +246,7 @@ class GeophiresXResult:
             else:
                 return int(number_str)
         except TypeError:
-            log.error(f'Unable to parse {field} as number: {number_str}')
+            self._logger.error(f'Unable to parse {field} as number: {number_str}')
             return None
 
     def _get_end_use_option(self) -> EndUseOption:

@@ -5,14 +5,15 @@ from pathlib import Path
 
 from geophires_x import GEOPHIRESv3 as geophires
 
-from .common import log
+from .common import _get_logger
 from .geophires_input_parameters import EndUseOption
 from .geophires_input_parameters import GeophiresInputParameters
 from .geophires_x_result import GeophiresXResult
 
 
 class GeophiresXClient:
-    def __init__(self, enable_caching=True):
+    def __init__(self, enable_caching=True, logger_name='root'):
+        self._logger = _get_logger(logger_name=logger_name)
         self._enable_caching = enable_caching
         self._cache = {}
 
@@ -26,17 +27,17 @@ class GeophiresXClient:
 
         sys.argv = ['', input_params.as_file_path(), input_params.get_output_file_path()]
         try:
-            geophires.main()
+            geophires.main(enable_geophires_logging_config=False)
         except Exception as e:
             raise RuntimeError('GEOPHIRES encountered an exception') from e
         except SystemExit:
-            raise RuntimeError('GEOPHIRES exited') from None
+            raise RuntimeError('GEOPHIRES exited without giving a reason') from None
 
-        # Undo the ~unconventional~ things Geophires does.
+        # Undo Geophires internal global settings changes
         sys.argv = stash_sys_argv
         os.chdir(stash_cwd)
 
-        log.info(f'GEOPHIRES-X output file: {input_params.get_output_file_path()}')
+        self._logger.info(f'GEOPHIRES-X output file: {input_params.get_output_file_path()}')
 
         result = GeophiresXResult(input_params.get_output_file_path())
         if self._enable_caching:
@@ -47,6 +48,9 @@ class GeophiresXClient:
 
 if __name__ == '__main__':
     client = GeophiresXClient()
+    log = _get_logger()
+
+    # noinspection PyTypeChecker
     params = GeophiresInputParameters(
         {
             'Print Output to Console': 0,

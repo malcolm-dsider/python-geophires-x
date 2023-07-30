@@ -25,11 +25,6 @@ from Units import *
 NL="\n"
 
 class HIP_RA():
-    #set up logging.
-    logging.config.fileConfig('logging.conf')
-    logger = logging.getLogger('root')
-    logger.info("Init " + str(__name__))
-    
     """
     HIP_RA is the container class of the HIP_RA application, giving access to everything else, including the logger
     """
@@ -54,11 +49,11 @@ class HIP_RA():
         return y
 
     #user-defined functions
-    def densitywater(self, Twater)->float:   
+    def densitywater(self, Twater)->float:
         T = Twater+273.15
         rhowater = ( .7983223 + (1.50896E-3 - 2.9104E-6*T) * T) * 1E3 #water density correlation as used in Geophires v1.2 [kg/m3]
         return rhowater
-   
+
     def viscositywater(self, Twater)->float:
         muwater = 2.414E-5*np.power(10,247.8/(Twater+273.15-140))     #accurate to within 2.5% from 0 to 370 degrees C [Ns/m2]
         #xp = np.linspace(5,150,30)
@@ -66,7 +61,7 @@ class HIP_RA():
         #muwater = np.interp(Twater,xp,fp)
         return muwater
 
-    def heatcapacitywater(self, Twater)->float: 
+    def heatcapacitywater(self, Twater)->float:
         Twater = (Twater + 273.15)/1000
         A = -203.6060
         B = 1523.290
@@ -82,8 +77,8 @@ class HIP_RA():
         if Twater > 150.0: return 0.66
 
         return 0.0038 * Twater + 0.085
-    
-    def vaporpressurewater(self, Twater)->float: 
+
+    def vaporpressurewater(self, Twater)->float:
         if Twater < 100:
             A = 8.07131
             B = 1730.63
@@ -91,16 +86,16 @@ class HIP_RA():
         else:
             A = 8.14019
             B = 1810.94
-            C = 244.485 
+            C = 244.485
         vaporpressurewater = 133.322*(10**(A-B/(C+Twater)))/1000 #water vapor pressure in kPa using Antione Equation
         return vaporpressurewater
 
     def __init__(self):
         """
         The __init__ function is called automatically every time the class is being used to create a new object.
-        
-        The self parameter is a Python convention. It must be included in each function definition and points to the current instance of the class (the object that is being created). 
-        
+
+        The self parameter is a Python convention. It must be included in each function definition and points to the current instance of the class (the object that is being created).
+
         :param self: Reference the class instance itself
         :return: Nothing
         :doc-author: Malcolm Ross
@@ -109,11 +104,11 @@ class HIP_RA():
         #Set up all the Parameters that will be predefined by this class using the different types of parameter classes.  Setting up includes giving it a name, a default value, The Unit Type (length, volume, temperature, etc) and Unit Name of that value, sets it as required (or not), sets allowable range, the error message if that range is exceeded, the ToolTip Text, and the name of teh class that created it.
         #This includes setting up temporary variables that will be available to all the class but noy read in by user, or used for Output
         #This also includes all Parameters that are calculated and then published using the Printouts function.
-         
+
         #These disctionaries contains a list of all the parameters set in this object, stored as "Parameter" and "OutputParameter" Objects.  This will alow us later to access them in a user interface and get that list, along with unit type, preferred units, etc.
         self.ParameterDict = {}
         self.OutputParameterDict = {}
-            
+
         #Inputs
         self.ReservoirTemperature = self.ParameterDict[self.ReservoirTemperature.Name] = floatParameter("Reservoir Temperature", value = 150.0, Min=50, Max = 1000, UnitType = Units.TEMPERATURE, PreferredUnits = TemperatureUnit.CELCIUS, CurrentUnits = TemperatureUnit.CELCIUS, Required=True, ErrMessage = "assume default reservoir temperature (150 deg-C)", ToolTipText="Reservoir Temperature [150 dec-C]")
         self.RejectionTemperature = self.ParameterDict[self.RejectionTemperature.Name] = floatParameter("Rejection Temperature", value = 25.0, Min=0.1, Max = 200, UnitType = Units.TEMPERATURE, PreferredUnits = TemperatureUnit.CELCIUS, CurrentUnits = TemperatureUnit.CELCIUS, Required=True, ErrMessage = "assume default rejection temperature (25 deg-C)", ToolTipText="Rejection Temperature [25 dec-C]")
@@ -150,20 +145,20 @@ class HIP_RA():
         self.We = self.OutputParameterDict[self.We.Name] = OutputParameter(Name = "Produceable Electricity", value=-999.9, UnitType = Units.ENERGYCOST, PreferredUnits = EnergyUnit.MW, CurrentUnits = EnergyUnit.MW)
 
         self.logger.info("Complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
-        
+
     def read_parameters(self) -> None:
         """
-        The read_parameters function reads in the parameters from a dictionary created by reading the user-provided file and updates the parameter values for this object. 
-        
+        The read_parameters function reads in the parameters from a dictionary created by reading the user-provided file and updates the parameter values for this object.
+
         The function reads in all of the parameters that relate to this object, including those that are inherited from other objects. It then updates any of these parameter values that have been changed by the user.  It also handles any special cases.
-        
+
         :param self: Reference the class instance (such as it is) from within the class
         :param model: The container class of the application, giving access to everything else, including the logger
         :return: None
         :doc-author: Malcolm Ross
         """
         self.logger.info("Init " + str(__class__) + ": " + sys._getframe().f_code.co_name)
-        
+
         #declare some dictionaries
         self.InputParameters = {}  #dictionary to hold all the input parameter the user wants to change
 
@@ -227,15 +222,15 @@ class HIP_RA():
     def Calculate(self):
         """
         The Calculate function is where all the calculations are made.  This is handled on a class-by-class basis.
-        
+
         The Calculate function does not return anything, but it does store the results for later use by other functions.
-        
+
         :param self: Access the class variables
         :return: None
         :doc-author: Malcolm Ross
         """
         self.logger.info("Init "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
-        
+
         #This is where all the calcualtions are made using all the values that have been set.
         if self.DensityOfWater.value < self.DensityOfWater.Min: self.DensityOfWater.value = self.densitywater(self.ReservoirTemperature.value) * 1_000_000_000.0
         if self.HeatCapacityOfWater.value < self.HeatCapacityOfWater.Min: self.HeatCapacityOfWater.value = self.heatcapacitywater(self.ReservoirTemperature.value)/1000.0
@@ -248,7 +243,7 @@ class HIP_RA():
         self.WA.value = self.mWH.value * self.e.value * self.Rg.value * self.recoverableheat(self.ReservoirTemperature.value)
         self.WE.value = self.WA.value * self.UtilEff_func(self.ReservoirTemperature.value)
         self.We.value =(((self.WE.value*0.27777778)/(8760*self.ReservoirLifeCycle.value))/1_000_000)
- 
+
         self.logger.info("complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
 
     def PrintOutputs(self):
@@ -259,7 +254,7 @@ class HIP_RA():
             model (Model): The container class of the application, giving access to everything else, including the logger
         """
         self.logger.info("Init " + str(__class__) + ": " + sys._getframe().f_code.co_name)
-    
+
         #Deal with converting Units back to PreferredUnits, if required.
         #before we write the outputs, we go thru all the parameters for all of the objects and set the values back to the units that the user entered the data in
         #We do this because the value may be displayed in the output, and we want the user to recginze their value, not some converted value
@@ -281,7 +276,7 @@ class HIP_RA():
         try:
             outputfile = "HIP.out"
             if len(sys.argv) > 2: outputfile = sys.argv[2]
-            with open(outputfile,'w', encoding='UTF-8') as f:    
+            with open(outputfile,'w', encoding='UTF-8') as f:
                 f.write('                               *********************\n')
                 f.write('                               ***HIP CASE REPORT***\n')
                 f.write('                               *********************\n')
@@ -338,7 +333,13 @@ def main():
 
     #write the outputs
     model.PrintOutputs()
-    
+
     logger.info("Complete "+ str(__name__) + ": " + sys._getframe().f_code.co_name)
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    #set up logging.
+    logging.config.fileConfig('logging.conf')
+    logger = logging.getLogger('root')
+    logger.info("Init " + str(__name__))
+
+    main()

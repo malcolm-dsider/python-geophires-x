@@ -21,11 +21,6 @@ import shutil
 import subprocess
 import multiprocessing
 
-#set up logging.
-logging.config.fileConfig('logging.conf')
-logger = logging.getLogger('root')
-logger.info("Init " + str(__name__))
-
 def CheckAndReplaceMean(input_value, args) -> list:
     i = 0
     for inputx in input_value:
@@ -120,10 +115,10 @@ def main():
     #from the command line, read what we need to know:
     #    0) Code_File: Python code to run
     #    1) Input_file: The base model for the calculations
-    #    2) MC_Settings_file: The settings file for the MC run: 
-    #         a) the input variables to change (spelling and case are IMPORTANT), their distribition functions 
-    #         (choices = normal, uniform, triangular, lognormal, binomial - see numpy.random for documenation), 
-    #         and the inputs for that distribution function (Comma seperated; If the mean is set to "#", then value from the Input_file as the mode/mean). In the form: 
+    #    2) MC_Settings_file: The settings file for the MC run:
+    #         a) the input variables to change (spelling and case are IMPORTANT), their distribition functions
+    #         (choices = normal, uniform, triangular, lognormal, binomial - see numpy.random for documenation),
+    #         and the inputs for that distribution function (Comma seperated; If the mean is set to "#", then value from the Input_file as the mode/mean). In the form:
     #                INPUT, Maximum Temperature, normal, mean, std_dev
     #                INPUT, Utilization Factor,uniform, min, max
     #                INPUT, Ambient Temperature,triangular, left, mode, right
@@ -150,7 +145,7 @@ def main():
     #Find the iteration value
     #Find the Output_file
     with open(args.MC_Settings_file, encoding='UTF-8') as f: flist = f.readlines()
-    
+
     Inputs = []
     Outputs = []
     Iterations = 0
@@ -163,7 +158,7 @@ def main():
         if pair[0].startswith("OUTPUT"): Outputs.append(pair[1])
         if pair[0].startswith("ITERATIONS"): Iterations = int(pair[1])
         if pair[0].startswith("MC_OUTPUT_FILE"): Outputfile = pair[1]
-    
+
     #check to see if there is a "#" in an input, if so, use the results file to replace it with the value
     for input_value in Inputs: input_value = CheckAndReplaceMean(input_value, args)
 
@@ -185,7 +180,7 @@ def main():
 
     # complete the processes
     for proc in procs: proc.join()
-    
+
 #read the resuts into an array
     with open(Outputfile, "r") as f:
         s = f.readline()    #skip the first line
@@ -211,7 +206,7 @@ def main():
     means = np.nanmean(Results, 0)
     std= np.nanstd(Results, 0)
     var = np.nanvar(Results, 0)
-    
+
 #write them out
     with open(Outputfile, "a") as f:
         i=0
@@ -228,4 +223,10 @@ def main():
 
     logger.info("Complete "+ str(__name__) + ": " + sys._getframe().f_code.co_name)
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    # set up logging.
+    logging.config.fileConfig('logging.conf')
+    logger = logging.getLogger('root')
+    logger.info("Init " + str(__name__))
+
+    main()

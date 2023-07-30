@@ -16,17 +16,19 @@ import logging
 import logging.config
 import geophires_x.Model as Model
 
-def main():
+def main(enable_geophires_logging_config=True):
     #set the starting directory to be the directory that this file is in
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-    #set up logging.
-    logging.config.fileConfig('logging.conf')
+    if enable_geophires_logging_config:
+        #set up logging.
+        logging.config.fileConfig('logging.conf')
+
     logger = logging.getLogger('root')
     logger.info("Init " + str(__name__))
 
     #initiate the entire model
-    model = Model.Model()
+    model = Model.Model(enable_geophires_logging_config=enable_geophires_logging_config)
 
     #read the parameters that apply to the model
     model.read_parameters()
