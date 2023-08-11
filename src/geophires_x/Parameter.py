@@ -90,6 +90,8 @@ class boolParameter(Parameter):
     value: bool = True
     DefaultValue: bool = True
 
+    json_parameter_type: str = 'boolean'
+
 @dataclass
 class intParameter(Parameter):
     """
@@ -103,6 +105,8 @@ class intParameter(Parameter):
     value: int = 0
     DefaultValue: int = 0
     AllowableRange: List[int] = field(default_factory=list)
+
+    json_parameter_type: str = 'integer'
 
 @dataclass
 class floatParameter(Parameter):
@@ -120,6 +124,8 @@ class floatParameter(Parameter):
     Min: float = -1.8e30
     Max: float = 1.8e30
 
+    json_parameter_type: str = 'number'
+
 @dataclass
 class strParameter(Parameter):
     """
@@ -131,6 +137,8 @@ class strParameter(Parameter):
     """
     value: str = ""
     DefaultValue: str = ""
+
+    json_parameter_type: str = 'string'
 
 @dataclass
 class listParameter(Parameter):
@@ -147,6 +155,8 @@ class listParameter(Parameter):
     DefaultValue: List[float] = field(default_factory=list)
     Min: float = -1.8e308
     Max: float = 1.8e308
+
+    json_parameter_type: str = 'array'
 
 def ReadParameter(ParameterReadIn: ParameterEntry, ParamToModify, model):
     """
