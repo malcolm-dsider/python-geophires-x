@@ -1,5 +1,7 @@
 # copyright, 2023, Malcolm I Ross
 from enum import IntEnum, Enum, auto
+
+
 class Units(IntEnum):
     """All possible systems of measure"""
     NONE = auto()
@@ -37,24 +39,28 @@ class Units(IntEnum):
     AVAILABILITY = auto()
     CO2PRODUCTION = auto()
 
-class  TemperatureUnit(Enum):
+
+class TemperatureUnit(str, Enum):
     """Temperature Units"""
     CELCIUS = "degC"
     FARENHEIT = "degF"
     KELVIN = "degK"
 
-class TemperatureGradientUnit(Enum):
+
+class TemperatureGradientUnit(str, Enum):
     """Temperature Gradient Units"""
     DEGREESCPERKM = "degC/km"
     DEGREESFPERMILE = "degF/mi"
     DEGREESCPERM = "degC/m"
 
-class PercentUnit(Enum):
+
+class PercentUnit(str, Enum):
     """Percent Units"""
     PERCENT = "%"
     TENTH = ""
 
-class LengthUnit(Enum):
+
+class LengthUnit(str, Enum):
     """Length Units"""
     METERS = "meter"
     CENTIMETERS = "centimeter"
@@ -63,7 +69,8 @@ class LengthUnit(Enum):
     INCHES = "in"
     MILES = "mile"
 
-class AreaUnit(Enum):
+
+class AreaUnit(str, Enum):
     """Area Units"""
     METERS2 = "m**2"
     CENTIMETERS2 = "cm**2"
@@ -72,7 +79,8 @@ class AreaUnit(Enum):
     INCHES2 = "in**2"
     MILES2 = "mi**2"
 
-class VolumeUnit(Enum):
+
+class VolumeUnit(str, Enum):
     """Volume Units"""
     METERS3 = "m**3"
     CENTIMETERS3 = "cm**3"
@@ -81,7 +89,8 @@ class VolumeUnit(Enum):
     INCHES3 = "in**3"
     MILES3 = "mi**3"
 
-class DensityUnit(Enum):
+
+class DensityUnit(str, Enum):
     """Density Units"""
     KGPERMETERS3 = "kg/m**3"
     GRPERCENTIMETERS3 = "gr/cm**3"
@@ -90,28 +99,32 @@ class DensityUnit(Enum):
     OZPERINCHES3 = "oz/in**3"
     LBSPERMILES3 = "lbs/mi**3"
 
-class EnergyUnit(Enum):
+
+class EnergyUnit(str, Enum):
     """Energy (electrcity or heat) Units"""
     WH = "Wh"
     KWH = "kWh"
     MWH = "MWh"
     GWH = "GWh"
 
-class PowerUnit(Enum):
+
+class PowerUnit(str, Enum):
     """Power (electrcity or heat) Units"""
     W = "W"
     KW = "kW"
     MW = "MW"
     GW = "GW"
 
-class EnergyFrequencyUnit(Enum):
+
+class EnergyFrequencyUnit(str, Enum):
     """Energy per interval Units"""
     WPERYEAR = "W/yr"
     KWPERYEAR = "kW/yr"
     MWPERYEAR = "MW/yr"
     GWPERYEAR = "GW/yr"
 
-class CurrencyUnit(Enum):
+
+class CurrencyUnit(str, Enum):
     """Currency Units"""
     MDOLLARS = "MUSD"
     KDOLLARS = "KUSD"
@@ -123,7 +136,8 @@ class CurrencyUnit(Enum):
     KMXN = "KMXN"
     MXN = "MXN"
 
-class CurrencyFrequencyUnit(Enum):
+
+class CurrencyFrequencyUnit(str, Enum):
     MDOLLARSPERYEAR = "MUSD/yr"
     KDOLLARSPERYEAR = "KUSD/yr"
     DOLLARSPERYEAR = "USD/yr"
@@ -133,64 +147,76 @@ class CurrencyFrequencyUnit(Enum):
     MMXNPERYEAR = "MXN/yr"
     KMXNPERYEAR = "KMXN/yr"
     MXNPERYEAR = "MXN/yr"
-    
-class EnergyCostUnit(Enum):
+
+
+class EnergyCostUnit(str, Enum):
     DOLLARSPERKWH = "USD/kWh"
     DOLLARSPERMWH = "USD/MWh"
     CENTSSPERKWH = "cents/kWh"
     DOLLARSPERKW = "USD/kW"
     CENTSSPERKW = "cents/kW"
     DOLLARSPERMMBTU = "USD/MMBTU"
-    
-class CostPerMassUnit(Enum):
+
+
+class CostPerMassUnit(str, Enum):
     CENTSSPERMT = "cents/mt"
     DOLLARSPERMT = "USD/mt"
     CENTSSPERLB = "cents/lb"
     DOLLARSPERLB = "USD/lb"
-    
-class CostPerDistanceUnit(Enum):
+
+
+class CostPerDistanceUnit(str, Enum):
     DOLLARSPERM = "USD/m"
 
-class PressureUnit(Enum):
+
+class PressureUnit(str, Enum):
     """Pressure Units"""
     KPASCAL = "kPa"
     PASCAL = "Pa"
     BAR = "bar"
     KBAR = "kbar"
 
-class AvailabilityUnit(Enum):
+
+class AvailabilityUnit(str, Enum):
     """Availability Units"""
     MWPERKGPERSEC = "MW/(kg/s)"
 
-class DrawdownUnit(Enum):
+
+class DrawdownUnit(str, Enum):
     """Drawdown Units"""
     KGPERSECPERSQMETER = "kg/s/m**2"
     PERYEAR = "1/year"
 
-class HeatUnit(Enum):
+
+class HeatUnit(str, Enum):
     """Heat Units"""
     J = "J"
     KJ = "kJ"
 
-class HeatCapacityUnit(Enum):
+
+class HeatCapacityUnit(str, Enum):
     """Heat Capacity Units"""
     JPERKGPERK = "J/kg/kelvin"
     KJPERKM3C = "kJ/km**3C"
     kJPERKGC = "kJ/kgC"
 
-class EntropyUnit(Enum):
+
+class EntropyUnit(str, Enum):
     """Entropy Units"""
     KJPERKGK = "kJ/kgK"
 
-class EnthalpyUnit(Enum):
+
+class EnthalpyUnit(str, Enum):
     """Enthalpy Units"""
     KJPERKG = "kJ/kg"
-    
-class ThermalConductivityUnit(Enum):
+
+
+class ThermalConductivityUnit(str, Enum):
     """Thermal Conductivity Units"""
     WPERMPERK = "watt/m/kelvin"
-    
-class TimeUnit(Enum):
+
+
+class TimeUnit(str, Enum):
     """Time Units"""
     MSECOND = "msec"
     SECOND = "sec"
@@ -199,38 +225,46 @@ class TimeUnit(Enum):
     DAY = "day"
     WEEK = "week"
     YEAR = "yr"
-    
-class FlowRateUnit(Enum):
+
+
+class FlowRateUnit(str, Enum):
     """Flow Rate Units"""
     KGPERSEC = "kg/sec"
-    
-class ImpedanceUnit(Enum):
+
+
+class ImpedanceUnit(str, Enum):
     """Impedance Units"""
-    GPASPERM3= "GPa.s/m**3"
-    
-class ProductivityIndexUnit(Enum):
+    GPASPERM3 = "GPa.s/m**3"
+
+
+class ProductivityIndexUnit(str, Enum):
     """Productivity IndexUnits"""
-    KGPERSECPERBAR= "kg/sec/bar"
-    
-class InjectivityIndexUnit(Enum):
+    KGPERSECPERBAR = "kg/sec/bar"
+
+
+class InjectivityIndexUnit(str, Enum):
     """Injectivity IndexUnits"""
-    KGPERSECPERBAR= "kg/sec/bar"
-    
-class PorosityUnit(Enum):
+    KGPERSECPERBAR = "kg/sec/bar"
+
+
+class PorosityUnit(str, Enum):
     """Porosity Units"""
-    PERCENT= "%"
-    
-class PermeabilityUnit(Enum):
+    PERCENT = "%"
+
+
+class PermeabilityUnit(str, Enum):
     """Permeability Units"""
-    SQUAREMETERS= "m**2"
-    
-class CO2ProductionUnit(Enum):
+    SQUAREMETERS = "m**2"
+
+
+class CO2ProductionUnit(str, Enum):
     """CO2 Production Units"""
-    LBSPERKWH= "lbs/kWh"
-    KPERKWH= "k/kWh"
+    LBSPERKWH = "lbs/kWh"
+    KPERKWH = "k/kWh"
     TONNEPERMWH = "t/MWh"
 
-class MassUnit(Enum):
+
+class MassUnit(str, Enum):
     """Mass Units"""
     GRAM = "gram"
     KILOGRAM = "kilogram"

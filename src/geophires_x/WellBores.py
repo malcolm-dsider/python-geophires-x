@@ -121,7 +121,7 @@ class WellBores:
                         if ParameterToModify.value == -1.0: self.usebuiltinppwellheadcorrelation = True
                         else: self.usebuiltinppwellheadcorrelation = False
         else:
-            model.logger.info("No parameters read becuase no content provided")
+            model.logger.info("No parameters read because no content provided")
         model.logger.info("read parameters complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
 
     #user-defined functions

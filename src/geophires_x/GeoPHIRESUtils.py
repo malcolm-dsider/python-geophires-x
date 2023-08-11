@@ -1,6 +1,7 @@
 import sys
 from .Parameter import ParameterEntry
 from os.path import exists
+import dataclasses, json
 
 
 def read_input_file(model, return_dict_1):
@@ -74,3 +75,14 @@ def read_input_file(model, return_dict_1):
             "No input parameter file specified on the command line. Proceeding with default parameter run... ")
 
     model.logger.info(f'Complete {__name__}: {sys._getframe().f_code.co_name}')
+
+
+class _EnhancedJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if dataclasses.is_dataclass(o):
+            return dataclasses.asdict(o)
+        return super().default(o)
+
+
+def jsone_dumps(obj) -> str:
+    return json.dumps(obj, cls=_EnhancedJSONEncoder)

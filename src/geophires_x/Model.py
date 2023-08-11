@@ -8,6 +8,7 @@ from .SurfacePlant import SurfacePlant
 from .Economics import Economics
 from .Outputs import Outputs
 
+
 class Model(object):
     """
     Model is the container class of the application, giving access to everything else, including the logger
@@ -17,7 +18,8 @@ class Model(object):
         """
         The __init__ function is called automatically every time the class is being used to create a new object.
 
-        The self parameter is a Python convention. It must be included in each function definition and points to the current instance of the class (the object that is being created).
+        The self parameter is a Python convention. It must be included in each function definition
+        and points to the current instance of the class (the object that is being created).
 
         :param self: Reference the class instance itself
         :return: Nothing
@@ -31,49 +33,51 @@ class Model(object):
             logging.config.fileConfig('logging.conf')
             self.logger.setLevel(logging.INFO)
 
-        self.logger.info("Init " + str(__class__) + ": " + sys._getframe().f_code.co_name)
+        self.logger.info(f'Init {str(__class__)}: {sys._getframe().f_code.co_name}')
 
-        #keep track of execution time
+        # keep track of execution time
         self.tic = time.time()
 
-        #declare some dictionaries
-        self.InputParameters = {}  #dictionary to hold all the input parameter the user wants to change
+        # declare some dictionaries
+        self.InputParameters = {}  # dictionary to hold all the input parameter the user wants to change
 
-        #This should give us a dictionary with all the parameters the user wants to set.  Should be only those value that they want to change from the default.
-        #we do this as soon as possible because what we instantiate may depend on settings in this file
+        # This should give us a dictionary with all the parameters the user wants to set.
+        # Should be only those value that they want to change from the default.
+        # we do this as soon as possible because what we instantiate may depend on settings in this file
         read_input_file(self, self.InputParameters)
 
-        #Initiate the elements of the Model
-        #this is where you can change what class get initiated - the superclass, or one of the subclasses
+        # Initiate the elements of the Model
+        # this is where you can change what class get initiated - the superclass, or one of the subclasses
         self.logger.info("Initiate the elements of the Model")
-        # we need to decide which reservoir to instantiate based on the user input (InputParameters), which we just read above for the first time
+        # we need to decide which reservoir to instantiate based on the user input (InputParameters),
+        # which we just read above for the first time
         from .TDPReservoir import TDPReservoir as TDPReservoir
-        self.reserv = TDPReservoir(self)     #Default is Thermal drawdown percentage model (GETEM)
+        self.reserv = TDPReservoir(self)  # Default is Thermal drawdown percentage model (GETEM)
         if 'Reservoir Model' in self.InputParameters:
             if self.InputParameters['Reservoir Model'].sValue == '0':
                 from .CylindricalReservoir import CylindricalReservoir as CylindricalReservoir
-                self.reserv = CylindricalReservoir(self)     #Simple Cylindrical Reservoir
+                self.reserv = CylindricalReservoir(self)  # Simple Cylindrical Reservoir
             elif self.InputParameters['Reservoir Model'].sValue == '1':
                 from .MPFReservoir import MPFReservoir as MPFReservoir
-                self.reserv = MPFReservoir(self)     #Multiple parallel fractures model (LANL)
+                self.reserv = MPFReservoir(self)  # Multiple parallel fractures model (LANL)
             elif self.InputParameters['Reservoir Model'].sValue == '2':
                 from .LHSReservoir import LHSReservoir as LHSReservoir
-                self.reserv = LHSReservoir(self)    #Multiple parallel fractures model (LANL)
+                self.reserv = LHSReservoir(self)  # Multiple parallel fractures model (LANL)
             elif self.InputParameters['Reservoir Model'].sValue == '3':
                 from .SFReservoir import SFReservoir as SFReservoir
-                self.reserv = SFReservoir(self)    #Drawdown parameter model (Tester)
+                self.reserv = SFReservoir(self)  # Drawdown parameter model (Tester)
             elif self.InputParameters['Reservoir Model'].sValue == '5':
                 from .UPPReservoir import UPPReservoir as UPPReservoir
-                self.reserv = UPPReservoir(self)    #Generic user-provided temperature profile
+                self.reserv = UPPReservoir(self)  # Generic user-provided temperature profile
             elif self.InputParameters['Reservoir Model'].sValue == '6':
                 from .TOUGH2Reservoir import TOUGH2Reservoir as TOUGH2Reservoir
-                self.reserv = TOUGH2Reservoir(self)    #Tough2 is called
+                self.reserv = TOUGH2Reservoir(self)  # Tough2 is called
         self.wellbores = WellBores(self)
         self.surfaceplant = SurfacePlant(self)
         self.economics = Economics(self)
         self.outputs = Outputs(self)
 
-        self.logger.info("Complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
+        self.logger.info(f'Complete {str(__class__)}: {sys._getframe().f_code.co_name}')
 
     def __str__(self):
         return "Model"
@@ -86,19 +90,19 @@ class Model(object):
         :return: None
         :doc-author: Malcolm Ross
         """
-        self.logger.info("Init " + str(__class__) + ": " + sys._getframe().f_code.co_name)
+        self.logger.info(f'Init {str(__class__)}: {sys._getframe().f_code.co_name}')
 
-        #Deal with all the parameter values that the user has provided.  This is handled on a class-by-class basis.
+        # Deal with all the parameter values that the user has provided.  This is handled on a class-by-class basis.
 
-        #Read parameters for the elements of the Model
+        # Read parameters for the elements of the Model
         self.logger.info("Read parameters for the elements of the Model")
-        self.reserv.read_parameters(self) #read the reservoir parameters
-        self.wellbores.read_parameters(self)   #read the wellbore parameters
-        self.surfaceplant.read_parameters(self) #read the surfaceplant parameters
-        self.economics.read_parameters(self) #read the economic parameters
-        self.outputs.read_parameters(self) #read the out parameters
+        self.reserv.read_parameters(self)  # read the reservoir parameters
+        self.wellbores.read_parameters(self)  # read the wellbore parameters
+        self.surfaceplant.read_parameters(self)  # read the surfaceplant parameters
+        self.economics.read_parameters(self)  # read the economic parameters
+        self.outputs.read_parameters(self)  # read the out parameters
 
-        self.logger.info("complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
+        self.logger.info(f'complete {str(__class__)}: {sys._getframe().f_code.co_name}')
 
     def Calculate(self):
         """
@@ -110,15 +114,28 @@ class Model(object):
         :return: None
         :doc-author: Malcolm Ross
         """
-        self.logger.info("Init "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
+        self.logger.info(f'Init {str(__class__)}: {sys._getframe().f_code.co_name}')
 
-        #This is where all the calcualtions are made using all the values that have been set.  This is handled on a class-by-class basis
+        # This is where all the calcualtions are made using all the values that have been set.
+        # This is handled on a class-by-class basis
 
-        #calculate the results
-        self.logger.info("Run calcuations for the elements of the Model")
-        self.reserv.Calculate(self) #model the reservoir
-        self.wellbores.Calculate(self) #model the wellbores
-        self.surfaceplant.Calculate(self) #model the surfaceplant
-        self.economics.Calculate(self)  #model the econoimcs
+        # calculate the results
+        self.logger.info("Run calculations for the elements of the Model")
+        self.reserv.Calculate(self)  # model the reservoir
+        self.wellbores.Calculate(self)  # model the wellbores
+        self.surfaceplant.Calculate(self)  # model the surfaceplant
+        self.economics.Calculate(self)  # model the econoimcs
 
-        self.logger.info("complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
+        self.logger.info(f'complete {str(__class__)}: {sys._getframe().f_code.co_name}')
+
+    def get_parameters_json(self) -> str:
+        from geophires_x.GeoPHIRESUtils import jsone_dumps
+
+        all_params = {}
+
+        all_params.update(self.reserv.ParameterDict)
+        all_params.update(self.wellbores.ParameterDict)
+        all_params.update(self.surfaceplant.ParameterDict)
+        all_params.update(self.economics.ParameterDict)
+
+        return jsone_dumps(all_params)
