@@ -12,7 +12,20 @@ def get_json_schema() -> dict:
 
     for param_name in params:
         param = params[param_name]
-        properties[param_name] = {'description': param['ToolTipText'], 'type': param['json_parameter_type']}
+
+        param['CurrentUnits']
+
+        properties[param_name] = {
+            'description': param['ToolTipText'],
+            'type': param['json_parameter_type'],
+            # 'units': Units(param['UnitType'])
+            # 'units': param_units
+        }
+
+        if type(param['CurrentUnits']) == str:
+            properties[param_name]['units'] = param['CurrentUnits']
+        else:
+            properties[param_name]['units'] = None
 
         if param['Required']:
             required.append(param_name)

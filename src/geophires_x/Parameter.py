@@ -61,8 +61,8 @@ class Parameter:
         InputComment (str): The optional comment that the user provided with that parameter in the text file
         ToolTipText (str): Text to place in a ToolTip in a UI
         UnitType (IntEnum): The class of units that parameter falls in (i.e., "length", "time", "area"...)
-        PreferredUnits (Enum): The units as reqwuired by GEOPHIRES (or your algorithms)
-        CurrentUnits (Enum): The units that the parameter is provided in (usually the sanme PreferredUnits)
+        PreferredUnits (Enum): The units as required by GEOPHIRES (or your algorithms)
+        CurrentUnits (Enum): The units that the parameter is provided in (usually the same PreferredUnits)
         UnitsMatch (boolean): Internal flag set when units are different
     """
     Name: str = ""
