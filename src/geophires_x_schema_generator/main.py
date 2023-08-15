@@ -13,19 +13,12 @@ def get_json_schema() -> dict:
     for param_name in params:
         param = params[param_name]
 
-        param['CurrentUnits']
-
         properties[param_name] = {
             'description': param['ToolTipText'],
             'type': param['json_parameter_type'],
-            # 'units': Units(param['UnitType'])
-            # 'units': param_units
+            'units': param['CurrentUnits'] if type(param['CurrentUnits']) == str else None,
+            'category': param['parameter_category'],
         }
-
-        if type(param['CurrentUnits']) == str:
-            properties[param_name]['units'] = param['CurrentUnits']
-        else:
-            properties[param_name]['units'] = None
 
         if param['Required']:
             required.append(param_name)
@@ -49,3 +42,5 @@ if __name__ == '__main__':
     build_path = Path(build_dir, 'geophires-request.json')
     with open(build_path, 'w') as f:
         f.write(json.dumps(get_json_schema(), indent=2))
+
+    print(f'Wrote schema file to {build_path}.')

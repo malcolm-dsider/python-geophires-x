@@ -72,10 +72,16 @@ class Parameter:
     ErrMessage: str = "assume default value (see manual)"
     InputComment: str = ""
     ToolTipText: str = Name
-    UnitType:IntEnum = Units.NONE
-    PreferredUnits:Enum = Units.NONE
-    CurrentUnits:Enum = PreferredUnits    #set to PreferredUnits assuming that the current units are the preferred units - they will only change if the read function reads a different unit associated with a parameter
-    UnitsMatch:bool = True
+    UnitType: IntEnum = Units.NONE
+    PreferredUnits: Enum = Units.NONE
+
+    # set to PreferredUnits assuming that the current units are the preferred units
+    # - they will only change if the read function reads a different unit associated with a parameter
+    CurrentUnits: Enum = PreferredUnits
+
+    UnitsMatch: bool = True
+
+    parameter_category: str = None
 
 
 @dataclass
