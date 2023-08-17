@@ -84,5 +84,5 @@ class _EnhancedJSONEncoder(json.JSONEncoder):
         return super().default(o)
 
 
-def jsone_dumps(obj) -> str:
+def json_dumpse(obj) -> str:
     return json.dumps(obj, cls=_EnhancedJSONEncoder)
