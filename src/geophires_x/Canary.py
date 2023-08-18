@@ -45,7 +45,7 @@ with arcpy.da.SearchCursor(FootPrints,['SHAPE@','Shape_Area_km2', "Shape_Thickne
 
         expression = u'{} = '.format(arcpy.AddFieldDelimiters(FootPrints, "gppd_idnr")) + "'" + str(id) + "'"
         with arcpy.da.UpdateCursor(FootPrints, ["HIP_PA"], expression) as cursor:
-            for row in cursor: 
+            for row in cursor:
                 row[0] = PA
                 cursor.updateRow(row)
 
@@ -62,7 +62,7 @@ with arcpy.da.SearchCursor(FootPrints,['SHAPE@','Shape_Area_km2', "Shape_Thickne
         with open("D:\\Work\\ProjectCanary\\"+id+"_MCSettings.txt", "a") as f: f.write(NL+"INPUT, Reservoir Thickness, uniform, " + str(0.9*thick) + ", " + str(thick*1.1))
 
 #Now run the MC Simulation
-        sys.argv = ['', "D:\\Work\\GEOPHIRES3-master\\HIP-RA.py", "D:\\Work\\ProjectCanary\\"+id+".txt", "D:\\Work\\ProjectCanary\\"+id+"_MCSettings.txt"]
+        sys.argv = ['', "D:\\Work\\GEOPHIRES3-master\\HIP_RA.py", "D:\\Work\\ProjectCanary\\"+id+".txt", "D:\\Work\\ProjectCanary\\"+id+"_MCSettings.txt"]
         runpy.run_path("D:\\Work\\GEOPHIRES3-master\\MC_GeoPHIRES3.py", run_name='__main__')
         os.remove("D:\\Work\\ProjectCanary\\"+id+"_MCSettings.txt")
 

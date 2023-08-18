@@ -46,7 +46,7 @@ class Model(object):
         # This should give us a dictionary with all the parameters the user wants to set.
         # Should be only those value that they want to change from the default.
         # we do this as soon as possible because what we instantiate may depend on settings in this file
-        read_input_file(self, self.InputParameters)
+        read_input_file(self.InputParameters, logger=self.logger)
 
         # Initiate the elements of the Model
         # this is where you can change what class get initiated - the superclass, or one of the subclasses

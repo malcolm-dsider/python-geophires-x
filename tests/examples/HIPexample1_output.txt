@@ -1,0 +1,17 @@
+                               *********************
+                               ***HIP CASE REPORT***
+                               *********************
+
+                           ***SUMMARY OF RESULTS***
+
+      Reservoir Temperature:       150.00 degC
+      Reservoir Volume:             23.17 km**3
+      Stored Heat:               8.22e+15 kJ
+      Fluid Produced:            3.82e+12 kilogram
+      Enthalpy:                     88.07 kJ/kg
+      Wellhead Heat:             1.28e+15 kJ
+      Recovery Factor:              15.52 %
+      Available Heat:            3.42e+13 kJ
+      Produceable Heat:          1.04e+13 kJ
+      Produceable Electricity:      11.02 MWh
+

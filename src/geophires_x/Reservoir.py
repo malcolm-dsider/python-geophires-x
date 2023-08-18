@@ -714,17 +714,17 @@ class Reservoir:
             maxdepth = 0
             intersecttemperature[0] = self.Tsurf.value + self.gradient.value[0] * self.layerthickness.value[0]
             for i in range(1, self.numseg.value - 1):
-                intersecttemperature[i] = intersecttemperature[i - 1] + self.gradient.value[i] * \
-                                          self.layerthickness.value[i]
+                intersecttemperature[i] = intersecttemperature[i - 1] + self.gradient.value[i] * self.layerthickness.value[i]
             layerindex = next(loc for loc, val in enumerate(intersecttemperature) if val > self.Tmax.value)
             if layerindex > 0:
-                for i in range(0, layerindex): maxdepth = maxdepth + self.layerthickness.value[i]
-                maxdepth = maxdepth + (self.Tmax.value - intersecttemperature[layerindex - 1]) / self.gradient.value[
-                    layerindex]
+                for i in range(0, layerindex):
+                    maxdepth = maxdepth + self.layerthickness.value[i]
+                maxdepth = maxdepth + (self.Tmax.value - intersecttemperature[layerindex - 1]) / self.gradient.value[layerindex]
             else:
                 maxdepth = (self.Tmax.value - self.Tsurf.value) / self.gradient.value[0]
 
-        if self.depth.value > maxdepth: self.depth.value = maxdepth
+        if self.depth.value > maxdepth:
+            self.depth.value = maxdepth
 
         # calculate initial reservoir temperature
         intersecttemperature = [self.Tsurf.value] + intersecttemperature

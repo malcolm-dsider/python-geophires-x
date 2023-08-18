@@ -12,6 +12,7 @@ Created on Wed November  16 10:43:04 2017
 
 import os
 import sys
+import time
 import logging
 import logging.config
 import numpy as np
@@ -20,6 +21,7 @@ import uuid
 import shutil
 import subprocess
 import multiprocessing
+
 
 def CheckAndReplaceMean(input_value, args) -> list:
     i = 0
@@ -38,7 +40,7 @@ def CheckAndReplaceMean(input_value, args) -> list:
         i = i + 1
     return(input_value)
 
-def WorkPackage(Job_ID, Inputs, Outputs, args, Outputfile):
+def WorkPackage(Job_ID, Inputs, Outputs, args, Outputfile, working_dir):
     tmpoutputfile = tmpfilename = ""
 #get random values for each of the INPUTS based on the distributions and boundary values
     rando = 0.0
@@ -61,7 +63,7 @@ def WorkPackage(Job_ID, Inputs, Outputs, args, Outputfile):
             s = s + input_value[0] + ", " + str(rando) + "\r\n"
 
 #make up a temporary file name that will be shared among files for this iteration
-    tmpfilename = str(uuid.uuid4()) + ".txt"
+    tmpfilename = working_dir + str(uuid.uuid4()) + ".txt"
     tmpoutputfile = tmpfilename.replace(".txt", "_result.txt")
 
 #copy the contents of the Input_file into a new input file
@@ -78,19 +80,28 @@ def WorkPackage(Job_ID, Inputs, Outputs, args, Outputfile):
     s=""
     s2={}
     result_s = ""
+    localOutputs=Outputs
+ 
+    #make sure a key file exists. If not, exit
+    if not os.path.exists(tmpoutputfile):
+        print ("Timed out waiting for: " + tmpoutputfile)
+        exit(-33)
+
     with open(tmpoutputfile, "r") as f:
         s=f.readline()
         i=0
         while s:
-            for out in Outputs:
+            for out in localOutputs:
                 if out in s:
+                    localOutputs.remove(out)
                     s2=s.split(":")
-                    s2 =s2[-1].strip()
+                    s2 =s2[1].strip()
                     s2=s2.split(" ")
                     s2=s2[0]
                     result_s = result_s + s2 + ", "
                     i = i + 1
                     if i < (len(Outputs) - 1): f.seek(0)     #go back to the beginning of the file in case the outputs that the user specified aer not in the order that they appear in the file.
+                    break
             s=f.readline()
 
 #delete  temporary files
@@ -108,21 +119,25 @@ def main():
     logging.config.fileConfig('logging.conf')
     logger = logging.getLogger('root')
     logger.info("Init " + str(__name__))
+    #keep track of execution time
+    tic = time.time()
 
     #set the starting directory to be the directory that this file is in
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    working_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(working_dir)
+    working_dir = working_dir +"\\"
 
     #from the command line, read what we need to know:
     #    0) Code_File: Python code to run
     #    1) Input_file: The base model for the calculations
-    #    2) MC_Settings_file: The settings file for the MC run:
-    #         a) the input variables to change (spelling and case are IMPORTANT), their distribition functions
-    #         (choices = normal, uniform, triangular, lognormal, binomial - see numpy.random for documenation),
-    #         and the inputs for that distribution function (Comma seperated; If the mean is set to "#", then value from the Input_file as the mode/mean). In the form:
+    #    2) MC_Settings_file: The settings file for the MC run: 
+    #         a) the input variables to change (spelling and case are IMPORTANT), their distribition functions 
+    #         (choices = normal, uniform, triangular, lognormal, binomial - see numpy.random for documenation), 
+    #         and the inputs for that distribution function (Comma seperated; If the mean is set to "#", then value from the Input_file as the mode/mean). In the form: 
     #                INPUT, Maximum Temperature, normal, mean, std_dev
     #                INPUT, Utilization Factor,uniform, min, max
     #                INPUT, Ambient Temperature,triangular, left, mode, right
-    #         b) the output variable(s) to track (spelling and case are IMPORTANT), in the form:
+    #         b) the output variable(s) to track (spelling and case are IMPORTANT), in the form [NOTE: THIS LIST SHOULD BE IN THE ORDER THEY APPEAR IN THE OUTPUT FILE]:
     #                OUTPUT, Average Net Electricity Production
     #                OUTPUT, Electricity breakeven price
     #         c) the number of iterations, in the form:
@@ -145,7 +160,7 @@ def main():
     #Find the iteration value
     #Find the Output_file
     with open(args.MC_Settings_file, encoding='UTF-8') as f: flist = f.readlines()
-
+    
     Inputs = []
     Outputs = []
     Iterations = 0
@@ -158,7 +173,7 @@ def main():
         if pair[0].startswith("OUTPUT"): Outputs.append(pair[1])
         if pair[0].startswith("ITERATIONS"): Iterations = int(pair[1])
         if pair[0].startswith("MC_OUTPUT_FILE"): Outputfile = pair[1]
-
+    
     #check to see if there is a "#" in an input, if so, use the results file to replace it with the value
     for input_value in Inputs: input_value = CheckAndReplaceMean(input_value, args)
 
@@ -173,30 +188,35 @@ def main():
 
     #loop thru the specified number of iterations
     procs = []
+    print ("Starting Iteration:", end='')
     for i in range(1, Iterations+1):
-        proc = multiprocessing.Process(target=WorkPackage, args=(Job_ID, Inputs, Outputs, args, Outputfile))
+        print (str(i), end=',')
+        proc = multiprocessing.Process(target=WorkPackage, args=(Job_ID, Inputs, Outputs, args, Outputfile, working_dir))
         procs.append(proc)
         proc.start()
 
     # complete the processes
     for proc in procs: proc.join()
+    
+    print ("\nDone with calculations! Summarizing...\n")
 
 #read the resuts into an array
+    actual_records_count = Iterations
     with open(Outputfile, "r") as f:
         s = f.readline()    #skip the first line
         all_results = f.readlines()
 
-    result_count = output_count = 0
-    Results = np.empty((len(Outputs) * Iterations), np.float32)
-    Results = Results.reshape(Iterations, len(Outputs))
+    result_count = 0
+    Results = []
     for line in all_results:
-        s2 = line.split(",")
-        output_count = 0
-        if len(s) > 1:
-            for s in s2:
-                Results[result_count, output_count] = float(s)
-                output_count = output_count + 1
         result_count = result_count + 1
+        if (not "-9999.0" in line) and len(s) > 1:
+            line=line.strip()
+            Results.append([float(y) for y in line.split(",")])
+        else:
+            print ("-9999.0 or space found in line " + str(result_count))
+            
+    actual_records_count = len(Results)
 
 #Compute the stats along the specified axes.
     mins = np.nanmin(Results, 0)
@@ -206,20 +226,25 @@ def main():
     means = np.nanmean(Results, 0)
     std= np.nanstd(Results, 0)
     var = np.nanvar(Results, 0)
-
+    
 #write them out
     with open(Outputfile, "a") as f:
         i=0
+        if Iterations != actual_records_count: f.write("\n\n" + str(actual_records_count) + " iterations finished successfully and were used to calculate the statistics\n\n")
         for output in Outputs:
             f.write (output + ":" + "\n")
-            f.write (f"     minimum:{mins[i]:10.2f}\n")
-            f.write (f"     maximum:{maxs[i]:10.2f}\n")
-            f.write (f"     median:{medians[i]:10.2f}\n")
-            f.write (f"     average:{averages[i]:10.2f}\n")
-            f.write (f"     mean:{means[i]:10.2f}\n")
-            f.write (f"     standard deviation:{std[i]:10.2f}\n")
-            f.write (f"     variance:{var[i]:10.2f}\n")
+            f.write (f"     minimum: {mins[i]:,.2f}\n")
+            f.write (f"     maximum: {maxs[i]:,.2f}\n")
+            f.write (f"     median: {medians[i]:,.2f}\n")
+            f.write (f"     average: {averages[i]:,.2f}\n")
+            f.write (f"     mean: {means[i]:,.2f}\n")
+            f.write (f"     standard deviation: {std[i]:,.2f}\n")
+            f.write (f"     variance: {var[i]:,.2f}\n")
             i = i + 1
+            
+    print (" Calculation Time: "+"{0:10.3f}".format((time.time()-tic)) +" sec\n")
+    print (" Calculation Time per iteration: "+"{0:10.3f}".format(((time.time()-tic))/actual_records_count) +" sec\n")
+    if Iterations != actual_records_count: print("\n\nNOTE:" + str(actual_records_count) + " iterations finished successfully and were used to calculate the statistics.\n\n")
 
     logger.info("Complete "+ str(__name__) + ": " + sys._getframe().f_code.co_name)
 

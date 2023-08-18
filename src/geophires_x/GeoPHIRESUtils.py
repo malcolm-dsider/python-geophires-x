@@ -1,11 +1,12 @@
 import sys
-from .Parameter import ParameterEntry
+from geophires_x.Parameter import ParameterEntry
 from os.path import exists
-import dataclasses, json
+import dataclasses
+import json
 
 
-def read_input_file(model, return_dict_1):
-    model.logger.info(f'Init {__name__}')
+def read_input_file(return_dict_1, logger=None):
+    logger.info(f'Init {__name__}')
 
     # Specify path of input file - it will always be the first command line argument.
     # If it doesn't exist, simply run the default model without any inputs
@@ -16,19 +17,19 @@ def read_input_file(model, return_dict_1):
         try:
             if exists(f_name):
                 content = []
-                model.logger.info(
+                logger.info(
                     f'Found filename: {f_name}. Proceeding with run using input parameters from that file')
                 with open(f_name, encoding='UTF-8') as f:
                     # store all input in one long string that will be passed to all objects
                     # so they can parse out their specific parameters (and ignore the rest)
                     content = f.readlines()
             else:
-                model.logger.warn(f'File: {f_name} not found - proceeding with default parameter run...')
+                logger.warn(f'File: {f_name} not found - proceeding with default parameter run...')
                 return
 
         except BaseException as ex:
             print(ex)
-            model.logger.error(f'Error {ex} using filename {f_name} proceeding with default parameter run...')
+            logger.error(f'Error {ex} using filename {f_name} proceeding with default parameter run...')
             return
 
         # successful read of data into list.  Now make a dictionary with all the parameter entries.
@@ -71,10 +72,10 @@ def read_input_file(model, return_dict_1):
             return_dict_1[description] = p_entry  # make the dictionary element
 
     else:
-        model.logger.warn(
+        logger.warn(
             "No input parameter file specified on the command line. Proceeding with default parameter run... ")
 
-    model.logger.info(f'Complete {__name__}: {sys._getframe().f_code.co_name}')
+    logger.info(f'Complete {__name__}: {sys._getframe().f_code.co_name}')
 
 
 class _EnhancedJSONEncoder(json.JSONEncoder):
