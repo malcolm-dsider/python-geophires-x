@@ -1,0 +1,8 @@
+mpmath
+numpy
+Pint
+jsons
+deepdiff
+cryptography
+setuptools==68.1.2
+mysql
