@@ -4,5 +4,8 @@ Pint
 jsons
 deepdiff
 cryptography
-setuptools==68.1.2
+setuptools
 mysql
+
+h5py
+scipy

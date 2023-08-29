@@ -24,7 +24,7 @@ class CLWellBores(WellBores.WellBores, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
     def __init__(self, model:AdvModel):
         """
         The __init__ function is called automatically every time the class is instantiated.  This function sets up all the parameters that will be used by this class, and also creates temporary variables that are available to all classes but not read in by user or used for Output.
-        
+
         :param self: Reference the object instance to itself
         :param model (AdvModel): The container class of the application, giving access to everything else, including the logger
         :return: None
@@ -51,7 +51,7 @@ class CLWellBores(WellBores.WellBores, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
         self.numhorizontalsections = self.ParameterDict[self.numhorizontalsections.Name] = intParameter("Number of Horizontal Wellbore Sections", value = 1, DefaultValue=1, AllowableRange=list(range(0,101,1)), UnitType = Units.NONE, ErrMessage="assume default for Number of Horizontal Wellbore Sections (1)", ToolTipText="Number of Horizontal Wellbore Sections")
         self.time_operation = self.ParameterDict[self.time_operation.Name] = floatParameter("Closed Loop Calculation Start Year", value = 0.01, DefaultValue=0.01, Min=0.01, Max = 100.0, UnitType = Units.TIME, PreferredUnits = TimeUnit.YEAR, CurrentUnits = TimeUnit.YEAR, ErrMessage="assume default for Closed Loop Calculation Start Year (0.01)", ToolTipText="Closed Loop Calculation Start Year")
         self.HorizontalsCased = self.ParameterDict[self.HorizontalsCased.Name] = boolParameter("Horizontals Cased", value=False, DefaultValue=False, Required=False, Provided=False, Valid=True, ErrMessage= "assume feault value (False)")
-        
+
         #local variables that need initialization
 
         #results are stored here and in the parent ProducedTemperature array
@@ -64,7 +64,7 @@ class CLWellBores(WellBores.WellBores, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
     def read_parameters(self, model:AdvModel) -> None:
         """
         The read_parameters function is called by the model to read in all the parameters that have been set for this object.  It loops through all the parameters that have been set for this object, looking for ones that match those of this class.  If it finds a match, it reads in and sets those values.
-        
+
         :param self: Access variables that belong to the class
         :param model (AdvModel): The container class of the application, giving access to everything else, including the logger
         :return: Nothing
@@ -74,7 +74,7 @@ class CLWellBores(WellBores.WellBores, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
         super().read_parameters(model)    #read the paremeters for the parent.
         #if we call super, we don't need to deal with setting the parameters here, just deal with the special cases for the variables in this class
         #because the call to the super.readparameters will set all the variables, including the ones that are specific to this class
-        
+
         #handle special cases for the parameters you added
         if self.diameter.value > 2.0: self.diameter.value = self.diameter.value * 0.0254
         self.area = math.pi * (self.diameter.value * 0.5) * (self.diameter.value * 0.5)
@@ -135,11 +135,11 @@ class CLWellBores(WellBores.WellBores, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
             fac2=-fac2
             cint[n-1]=con*c[n-2]/(n-1)
             sum += fac2*cint[n-1]
-            cint[0]=2.0*sum   
+            cint[0]=2.0*sum
         d=0.0
         dd=0.0
         y = (2.0 * b - a - b) * (1.0 / (b - a))
-        y2 = 2.0 * y   
+        y2 = 2.0 * y
         for j in range (n-1,0,-1):
             sv=d
             d=y2*d-dd+cint[j]
@@ -158,12 +158,12 @@ class CLWellBores(WellBores.WellBores, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
             temp = temp + self.Chebyshev(a,b,m,yy, zz, yt, zt, ye, ze, alpha, sp, self.pointsource)
             a = b
         return temp + (1 / sp * (math.exp(-sp * 1.0e5) - math.exp(-sp * 1.0e30))) / (ye * ze) / self.rhorock / self.cprock
-    
+
     ##################################################Duhamerl convolution method for closed-loop system######################################
     def laplace_solution(self, sp, model):
         Toutletl = 0.0
         ss = 1.0 / sp / self.chebeve_pointsource(self.y_well, self.z_well, self.y_well, self.z_well-0.078, self.y_boundary, self.z_boundary, self.alpha_rock, sp)
-  
+
         Toutletl = (self.Tini - self.Tinj.value) / sp * np.exp(-sp * ss / self.q_circulation / 24.0 / model.reserv.densitywater(self.Tini) / model.reserv.heatcapacitywater(self.Tini) * self.l_pipe.value - sp / self.velocity * self.l_pipe.value)
         return Toutletl
 
@@ -177,19 +177,19 @@ class CLWellBores(WellBores.WellBores, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
         SN = 0.0
         Az = 0.0
         Z = 0.0
-    
+
         if NL != MM:
             Gi[1] = 1.0
             NH = NL // 2
             SN = 2.0 * (NH % 2) - 1.0
-        
+
             for i in range(1,NL+1): Gi[i + 1] = Gi[i] * (i)
-            
+
             H[1] = 2.0 / Gi[NH]
             for i in range(1,NH+1):
                 FI = i
                 H[i] = math.pow(FI, NH) * Gi[2 * i + 1] / Gi[NH - i+1] / Gi[i + 1] / Gi[i]
-            
+
             for i in range(1,NL+1):
                 V[i] = 0.0
                 KBG = (i + 1) // 2
@@ -199,7 +199,7 @@ class CLWellBores(WellBores.WellBores, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
                 V[i] = SN * V[i]
                 SN = -SN
             MM = NL
-    
+
         FI = 0.0
         Az = DLN2 / self.time_operation.value
         Toutlet = 0.0
@@ -222,7 +222,7 @@ class CLWellBores(WellBores.WellBores, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
 
         #before we calculate anything, let's see if there is a suitable result already in the database
         key = self.CheckForExistingResult(model, os.path.abspath(__file__))
-        if key == None: 
+        if key == "":
             super().Calculate(model)    #run calculation because there was nothing in the database
             self.Tini = model.reserv.Tresoutput.value[0] #initialize the temperature to be the initial temperature of the reservoir
 
@@ -251,7 +251,7 @@ class CLWellBores(WellBores.WellBores, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
                 friction = 1./np.power((-2*np.log10(relroughness/3.7+2.51/Rewaterhoriz/np.sqrt(friction))),2.)
                 friction = 1./np.power((-2*np.log10(relroughness/3.7+2.51/Rewaterhoriz/np.sqrt(friction))),2.)
                 friction = 1./np.power((-2*np.log10(relroughness/3.7+2.51/Rewaterhoriz/np.sqrt(friction))),2.) #6 iterations to converge
-    
+
                 #assume everything stays liquid throughout
                 #horizontal section pressure drop [kPa] per lateral section
                 #assume no bouyancy effect becasue laterals are horizontal, or if they are not, they return to the same place, so there is no bouyancy effect
@@ -264,7 +264,7 @@ class CLWellBores(WellBores.WellBores, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
             model.wellbores.DPOverall.value = model.wellbores.DPOverall.value + self.HorizontalPressureDrop.value
 
             #recalculate pumping power [MWe] (approximate)
-            model.wellbores.PumpingPower.value = model.wellbores.DPOverall.value*self.q_circulation/rhowater/model.surfaceplant.pumpeff.value/1E3   
+            model.wellbores.PumpingPower.value = model.wellbores.DPOverall.value*self.q_circulation/rhowater/model.surfaceplant.pumpeff.value/1E3
 
             #in GEOPHIRES v1.2, negative pumping power values become zero (b/c we are not generating electricity) = thermosiphon is happening!
             model.wellbores.PumpingPower.value = [0. if x<0. else x for x in self.PumpingPower.value]
@@ -275,10 +275,11 @@ class CLWellBores(WellBores.WellBores, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
 
             #store the calculate result and associated object paremeters in the database
             resultkey = self.store_result(model, self)
-            if resultkey == None: model.logger.warn("Failed To Store "+ str(__class__) + " " + os.path.abspath(__file__))
+            if resultkey.startswith("ERROR"): model.logger.warn("Failed To Store "+ str(__class__) + " " + os.path.abspath(__file__))
+            elif len(resultkey) == 0: pass
             else: model.logger.info("stored " + str(__class__) + " " + os.path.abspath(__file__) + " as: " + resultkey)
 
         model.logger.info("complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
-        
+
     def __str__(self):
         return "CLWellBores"

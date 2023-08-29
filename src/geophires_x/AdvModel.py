@@ -3,10 +3,12 @@ import sys
 import geophires_x.Model as Model
 import geophires_x.AdvGeoPHIRESUtils as AdvGeoPHIRESUtils
 
+
 class AdvModel(Model.Model, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
     """
     AdvModel is the container class of the advanced elements of the application, giving access to everything optional, including the logger
     """
+
     def __init__(self):
         """
         The __init__ function is called automatically every time the class is being used to create a new object.
@@ -15,16 +17,23 @@ class AdvModel(Model.Model, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
         :return: Nothing
         :doc-author: Malcolm Ross
         """
-        super().__init__()   # initialize the parent parameters and variables
+        super().__init__()  # initialize the parent parameters and variables
 
+        self.ccuseconomics = None
+        self.ccusoutputs = None
+        self.sdacgtoutputs = None
+        self.sdacgteconomics = None
+        self.addoutputs = None
+        self.addeconomics = None
         model_elements = self.RunStoredProcedure("model_elements", [1])
         model_connections = self.RunStoredProcedure("model_connections", [1])
         self.RunStoredProcedure("delete_model", [14])
         self.RunStoredProcedure("add_new_model", ["dummy", "new", 999])
 
-        #We don't initiate the optional elements here becasue we don't know if the user wants to use them or not - we won't know that until we read the parameters (in the next step)
+        # We don't initiate the optional elements here because we don't know if the user wants to use them or not -
+        # we won't know that until we read the parameters (in the next step)
 
-        self.logger.info("Complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
+        self.logger.info("Complete " + str(__class__) + ": " + sys._getframe().f_code.co_name)
 
     def read_parameters(self) -> None:
         """
@@ -34,17 +43,17 @@ class AdvModel(Model.Model, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
         :doc-author: Malcolm Ross
         """
         self.logger.info("Init " + str(__class__) + ": " + sys._getframe().f_code.co_name)
-        super().read_parameters()   # read the parent parameters and variables
+        super().read_parameters()  # read the parent parameters and variables
 
-        #Deal with all the parameter values that the user has provided.  This is handled on a class-by-class basis.
+        # Deal with all the parameter values that the user has provided.  This is handled on a class-by-class basis.
         self.logger.info("Read parameters for the newer elements of the Model and instantiate new attributes as needed")
 
         if self.wellbores.IsAGS.value:
-            #If we are doing AGS, we need to replace the various objects we with versions of the objects that have AGS functionality.
+            # If we are doing AGS, we need to replace the various objects we with versions of the objects that have AGS functionality.
             # that means importing them, initializing them, then reading their parameters
             self.logger.info("Initiate the AGS elements")
-            import CylindricalReservoir     #use the simple cylindrical reservoir for all AGS systems.
-            del self.reserv     #delete the orginal object so we can replace it
+            import CylindricalReservoir  # use the simple cylindrical reservoir for all AGS systems.
+            del self.reserv  # delete the original object so we can replace it
             self.reserv = CylindricalReservoir.CylindricalReservoir(self)
             import AGSWellBores
             del self.wellbores
@@ -66,32 +75,32 @@ class AdvModel(Model.Model, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
             self.economics.read_parameters(self)
             self.outputs.read_parameters(self)
 
-        if self.economics.DoAddOnCalculations.value:    #if we find out we have a add-ons, we need to instanitaite it, then read for the parameters
-            self.logger.info("Initiate the Add-on elemnets")
-            import EconomicsAddOns   #do this only is user wants add-ons
+        if self.economics.DoAddOnCalculations.value:  # if we find out we have a add-ons, we need to instanitaite it, then read for the parameters
+            self.logger.info("Initiate the Add-on elements")
+            import EconomicsAddOns  # do this only is user wants add-ons
             self.addeconomics = EconomicsAddOns.EconomicsAddOns(self)
             import OutputsAddOns
             self.addeconomics.read_parameters(self)
             self.addoutputs = OutputsAddOns.OutputsAddOns(self)
             self.addoutputs.read_parameters(self)
-        if self.economics.DoCCUSCalculations.value:    #if we find out we have a ccus, we need to instanitaite it, then read for the parameters
+        if self.economics.DoCCUSCalculations.value:  # if we find out we have a ccus, we need to instanitaite it, then read for the parameters
             self.logger.info("Initiate the CCUS elements")
-            import EconomicsCCUS   #do this only is user wants CCUS
+            import EconomicsCCUS  # do this only is user wants CCUS
             self.ccuseconomics = EconomicsCCUS.EconomicsCCUS(self)
             self.ccuseconomics.read_parameters(self)
             import OutputsCCUS
             self.ccusoutputs = OutputsCCUS.OutputsCCUS(self)
             self.ccusoutputs.read_parameters(self)
-        if self.economics.DoSDACGTCalculations.value:    #if we find out we have a S-DAC-GT calculation, we need to instanitaite it, then read for the parameters
+        if self.economics.DoSDACGTCalculations.value:  # if we find out we have a S-DAC-GT calculation, we need to instanitaite it, then read for the parameters
             self.logger.info("Initiate the S-DAC-GT elements")
-            import EconomicsS_DAC_GT    #do this only is user wants S-DAC-GT
+            import EconomicsS_DAC_GT  # do this only is user wants S-DAC-GT
             self.sdacgteconomics = EconomicsS_DAC_GT.EconomicsS_DAC_GT(self)
             self.sdacgteconomics.read_parameters(self)
             import OutputsS_DAC_GT
             self.sdacgtoutputs = OutputsS_DAC_GT.OutputsS_DAC_GT(self)
             self.sdacgtoutputs.read_parameters(self)
 
-        self.logger.info("complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
+        self.logger.info("complete " + str(__class__) + ": " + sys._getframe().f_code.co_name)
 
     def Calculate(self):
         """
@@ -101,28 +110,31 @@ class AdvModel(Model.Model, AdvGeoPHIRESUtils.AdvGeoPHIRESUtils):
         :return: None
         :doc-author: Malcolm Ross
         """
-        self.logger.info("Init "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
+        self.logger.info("Init " + str(__class__) + ": " + sys._getframe().f_code.co_name)
 
-        #This is where all the calculations are made using all the values that have been set.  This is handled on a class-by-class basis
-        #We choose not to call the calculate of the parent, but rather let the child handle the call to the parent if it is needed.
+        # This is where all the calculations are made using all the values that have been set.  This is handled on a class-by-class basis
+        # We choose not to call the calculate of the parent, but rather let the child handle the call to the parent if it is needed.
 
-        #Reservoir
+        # Reservoir
         self.SmartCalculate(self, self.reserv)
 
-        #WellBores
+        # WellBores
         self.SmartCalculate(self, self.wellbores)
 
-        #SurfacePlant
+        # SurfacePlant
         self.SmartCalculate(self, self.surfaceplant)
 
-        #Economics
+        # Economics
         self.SmartCalculate(self, self.economics)
 
-        if self.economics.DoAddOnCalculations.value: self.SmartCalculate(self, self.addeconomics)
-        if self.economics.DoCCUSCalculations.value: self.SmartCalculate(self, self.ccuseconomics)
-        if self.economics.DoSDACGTCalculations.value: self.SmartCalculate(self, self.sdacgteconomics)
- 
-        self.logger.info("complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
+        if self.economics.DoAddOnCalculations.value:
+            self.SmartCalculate(self, self.addeconomics)
+        if self.economics.DoCCUSCalculations.value:
+            self.SmartCalculate(self, self.ccuseconomics)
+        if self.economics.DoSDACGTCalculations.value:
+            self.SmartCalculate(self, self.sdacgteconomics)
+
+        self.logger.info("complete " + str(__class__) + ": " + sys._getframe().f_code.co_name)
 
     def __str__(self):
         return "AdvModel"
