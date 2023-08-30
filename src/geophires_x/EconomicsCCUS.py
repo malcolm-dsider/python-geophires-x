@@ -35,7 +35,7 @@ class EconomicsCCUS(Economics.Economics):
         #set up the parameters using the Parameter Constructors (intParameter, floatParameter, strParameter, etc); initialize with their name, default value, and valid range (if int or float).  Optionally, you can specify:
         # Required (is it reuired to run? default value = False), ErrMessage (what GEOPHIRES will report if the value provided is invalid, "assume default value (see manual)"), ToolTipText (when there is a GIU, this is the text that the user will see, "This is ToolTip Text"),
         # UnitType (the type of units associated with this parameter (length, temperature, density, etc), Units.NONE), CurrentUnits (what the units are for this parameter (meters, celcius, gm/cc, etc, Units:NONE), and PreferredUnits (ususally equal to CurrentUnits, but these are the units that the calculations assume when running, Units.NONE
-        self.FixedInternalRate = self.ParameterDict[self.FixedInternalRate.Name] = floatParameter("Fixed Internal Rate", value = 6.25, DefaultValue=6.25, Min=0.0, Max = 100.0, UnitType = Units.PERCENT, PreferredUnits = PercentUnit.TENTH, CurrentUnits = PercentUnit.TENTH, ErrMessage="assume default for fixed internal rate (6.25%)", ToolTipText="Fixed Internal Rate (used in NPV calculation)")
+        self.FixedInternalRate = self.ParameterDict[self.FixedInternalRate.Name] = floatParameter("Fixed Internal Rate", value = 6.25, DefaultValue=6.25, Min=0.0, Max = 100.0, UnitType = Units.PERCENT, PreferredUnits = PercentUnit.PERCENT, CurrentUnits = PercentUnit.PERCENT, ErrMessage="assume default for fixed internal rate (6.25%)", ToolTipText="Fixed Internal Rate (used in NPV calculation)")
         self.ConstructionYears = self.ParameterDict[self.ConstructionYears.Name]  = intParameter("Construction Years", value = 1, DefaultValue=1, AllowableRange=list(range(1,15,1)), UnitType = Units.NONE, ErrMessage="assume default number of years in construction (1)", ToolTipText="Number of years spent in construction (assumes whole years, no fractions)")
         self.CCUSEndPrice = self.ParameterDict[self.CCUSEndPrice.Name] = floatParameter("Ending CCUS Credit Value", value = 0.0, DefaultValue=0.0, Min=0, Max=1000, UnitType = Units.COSTPERMASS, PreferredUnits = CostPerMassUnit.DOLLARSPERLB, CurrentUnits = CostPerMassUnit.DOLLARSPERLB)
         self.CCUSEscalationStart = self.ParameterDict[self.CCUSEscalationStart.Name]  = intParameter("CCUS Escalation Start Year", value = 0, DefaultValue=0, AllowableRange=list(range(0,101,1)), UnitType = Units.TIME, PreferredUnits = TimeUnit.YEAR, CurrentUnits = TimeUnit.YEAR, ErrMessage="assume default CCUS escalation delay time (5 years)", ToolTipText="Number of years after start of project before start of CCUS incentives")
@@ -108,8 +108,6 @@ class EconomicsCCUS(Economics.Economics):
         #If you sublcass this class, you can choose to run these calculations before (or after) your calculations, but that assumes you have set all the values that are required for these calculations
         #If you choose to sublass this master class, you can also choose to override this method (or not), and if you do, do it before or after you call you own version of this method.  If you do, you can also choose to call this method from you class, which can effectively run the calculations of the superclass, making all thr values available to your methods. but you had n=betteer have set all the paremeters!
         
-        #Calcuate carbon pricew model
-        self.CCUSPrice.value = [0.0] * model.surfaceplant.plantlifetime.value
         self.CCUSRevenue.value = [0.0] * model.surfaceplant.plantlifetime.value
         self.CCUSCashFlow.value = [0.0] * model.surfaceplant.plantlifetime.value
         self.CCUSCummCashFlow.value = [0.0] * model.surfaceplant.plantlifetime.value
@@ -117,22 +115,10 @@ class EconomicsCCUS(Economics.Economics):
         self.CarbonThatWouldHaveBeenProducedTotal.value = 0.0
         ProjectCapCostPerYear = (model.economics.CCap.value)/self.ConstructionYears.value
 
-        #build the carbon credit price model, amking sure to start at the year they requested.
-        for i in range(self.CCUSEscalationStart.value, model.surfaceplant.plantlifetime.value,1):
-            self.CCUSPrice.value[i] = self.CCUSStartPrice.value
-            if i >= self.CCUSEscalationStart.value: self.CCUSPrice.value[i] = self.CCUSPrice.value[i] + ((i - self.CCUSEscalationStart.value) * self.CCUSEscalationRate.value)
-            if self.CCUSPrice.value[i] > self.CCUSEndPrice.value: self.CCUSPrice.value[i] = self.CCUSEndPrice.value
-
-        #build the elec and heat price models
-        self.CCUSOnElecPrice.value = [0.0] * model.surfaceplant.plantlifetime.value
-        self.CCUSOnHeatPrice.value = [0.0] * model.surfaceplant.plantlifetime.value
-        for i in range(0,model.surfaceplant.plantlifetime.value,1):
-            self.CCUSOnElecPrice.value[i] = self.ElecStartPrice.value
-            self.CCUSOnHeatPrice.value[i] = self.HeatStartPrice.value
-            if i >= self.ElecEscalationStart.value: self.CCUSOnElecPrice.value[i] = self.CCUSOnElecPrice.value[i] + ((i - self.ElecEscalationStart.value) * self.ElecEscalationRate.value)
-            if i >= self.HeatEscalationStart.value: self.CCUSOnHeatPrice.value[i] = self.CCUSOnHeatPrice.value[i] + ((i - self.HeatEscalationStart.value) * self.HeatEscalationRate.value)
-            if self.CCUSOnElecPrice.value[i] > self.ElecEndPrice.value: self.CCUSOnElecPrice.value[i] = self.ElecEndPrice.value
-            if self.CCUSOnHeatPrice.value[i] > self.HeatEndPrice.value: self.CCUSOnHeatPrice.value[i] = self.HeatEndPrice.value
+        #Calcuate carbon price models
+        self.CCUSPrice.value = self.BuildPricingModel(model.surfaceplant.plantlifetime.value, self.CCUSEscalationStart.value, self.CCUSStartPrice.value, self.CCUSEndPrice.value, self.CCUSEscalationStart.value, self.CCUSEscalationRate.value)
+        self.CCUSOnElecPrice.value = self.BuildPricingModel(model.surfaceplant.plantlifetime.value, 0, self.ElecStartPrice.value, self.ElecEndPrice.value, self.ElecEscalationStart.value, self.ElecEscalationRate.value)
+        self.CCUSOnHeatPrice.value = self.BuildPricingModel(model.surfaceplant.plantlifetime.value, 0, self.HeatStartPrice.value, self.HeatEndPrice.value, self.HeatEscalationStart.value, self.HeatEscalationRate.value)
 
         #Figure out how much energy is being produced each year, and the amount of carbon that would have been produced if that energy had been made using the grdi average carbon production.  That then gives us the revenue, since we have a carbon price model 
         #We can also get annual cash flow from it.
