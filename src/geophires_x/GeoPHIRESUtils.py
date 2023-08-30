@@ -72,8 +72,7 @@ def read_input_file(return_dict_1, logger=None):
             return_dict_1[description] = p_entry  # make the dictionary element
 
     else:
-        logger.warn(
-            "No input parameter file specified on the command line. Proceeding with default parameter run... ")
+        logger.warn("No input parameter file specified on the command line. Proceeding with default parameter run... ")
 
     logger.info(f'Complete {__name__}: {sys._getframe().f_code.co_name}')
 
