@@ -104,7 +104,8 @@ class Reservoir:
             CurrentUnits=TemperatureUnit.CELCIUS,
             Required=True,
             ErrMessage="assume default maximum temperature (400 deg.C)",
-            ToolTipText="Maximum allowable reservoir temperature (e.g. due to drill bit or logging tools constraints). GEOPHIRES will cap the drilling depth to stay below this maximum temperature."
+            ToolTipText="Maximum allowable reservoir temperature (e.g. due to drill bit or logging tools constraints). \
+            GEOPHIRES will cap the drilling depth to stay below this maximum temperature."
         )
 
         self.numseg = self.ParameterDict[self.numseg.Name] = intParameter(
@@ -264,7 +265,12 @@ class Reservoir:
             Required=True,
             UnitType=Units.NONE,
             ErrMessage="assume default reservoir volume option",
-            ToolTipText="Specifies how the reservoir volume, and fracture distribution (for reservoir models 1 and 2) are calculated. The reservoir volume is used by GEOPHIRES to estimate the stored heat in place. The fracture distribution is needed as input for the EGS fracture-based reservoir models 1 and 2: Specify number of fractures and fracture separation, 2: Specify reservoir volume and fracture separation, 3: Specify reservoir volume and number of fractures, 4: Specify reservoir volume only (sufficient for reservoir models 3, 4, 5 and 6)"
+            ToolTipText="Specifies how the reservoir volume, and fracture distribution (for reservoir models 1 and 2) \
+            are calculated. The reservoir volume is used by GEOPHIRES to estimate the stored heat in place. The \
+            fracture distribution is needed as input for the EGS fracture-based reservoir models 1 and 2: \
+            Specify number of fractures and fracture separation, 2: Specify reservoir volume and fracture separation, \
+            3: Specify reservoir volume and number of fractures, 4: Specify reservoir volume only \
+            (sufficient for reservoir models 3, 4, 5 and 6)"
         )
 
         self.fracshape = self.ParameterDict[self.fracshape.Name] = intParameter(
@@ -274,7 +280,9 @@ class Reservoir:
             AllowableRange=[1, 2, 3, 4],
             UnitType=Units.NONE,
             ErrMessage="assume default fracture shape (1)",
-            ToolTipText="Specifies the shape of the (identical) fractures in a fracture-based reservoir: 1: Circular fracture with known area, 2: Circular fracture with known diameter, 3: Square fracture, 4: Rectangular fracture"
+            ToolTipText="Specifies the shape of the (identical) fractures in a fracture-based reservoir: \
+            1: Circular fracture with known area, 2: Circular fracture with known diameter, \
+            3: Square fracture, 4: Rectangular fracture"
         )
 
         self.fracarea = self.ParameterDict[self.fracarea.Name] = floatParameter(
@@ -336,7 +344,8 @@ class Reservoir:
             PreferredUnits=LengthUnit.METERS,
             CurrentUnits=LengthUnit.METERS,
             ErrMessage="assume default fracture separation (50 m)",
-            ToolTipText="Separation of identical parallel fractures with uniform spatial distribution in EGS fracture-based reservoir"
+            ToolTipText="Separation of identical parallel fractures with uniform spatial distribution \
+            in EGS fracture-based reservoir"
         )
 
         self.resvol = self.ParameterDict[self.resvol.Name] = floatParameter(
@@ -443,7 +452,8 @@ class Reservoir:
             CurrentUnits=TemperatureUnit.CELCIUS,
             Required=True,
             ErrMessage="assume default surface temperature (15 deg.C)",
-            ToolTipText="Surface temperature used for calculating bottom-hole temperature (with geothermal gradient and reservoir depth)"
+            ToolTipText="Surface temperature used for calculating bottom-hole temperature \
+            (with geothermal gradient and reservoir depth)"
         )
 
         self.usebuiltintough2model = False
@@ -451,7 +461,11 @@ class Reservoir:
         self.MyClass = sclass.replace("\'>", "")
         self.MyPath = os.path.abspath(__file__)
 
-        # Results - used by other objects or printed in output downstream - note the first 6 values are copies of the input values.  They are required because it is a bad practice to change input values after the user has assigned them.  Instead, we make new parameters that are copies of the input parameters, but then modify these values - we only use and display the calculated values. This is OK because the calculated value starts a a copy of the input value and only changes if needed.
+        # Results - used by other objects or printed in output downstream - note the first 6 values are copies of the
+        # input values.  They are required because it is a bad practice to change input values after the user
+        # has assigned them.  Instead, we make new parameters that are copies of the input parameters, but then
+        # modify these values - we only use and display the calculated values. This is OK because the calculated value
+        # starts a a copy of the input value and only changes if needed.
         self.fracsepcalc = self.OutputParameterDict[self.fracsepcalc.Name] = OutputParameter(
             "Calculated Fracture Separation",
             value=self.fracsep.value,
@@ -554,10 +568,12 @@ class Reservoir:
 
     def read_parameters(self, model: Model) -> None:
         """
-        The read_parameters function reads in the parameters from a dictionary created by reading the user-provided file and updates the parameter values for this object.
+        The read_parameters function reads in the parameters from a dictionary created by reading the user-provided file
+        and updates the parameter values for this object.
 
-        The function reads in all of the parameters that relate to this object, including those that are inherited from other objects. It then updates any of these parameter values that have been changed by the user.  It also handles any special cases.
-
+        The function reads in all the parameters that relate to this object, including those that are inherited from
+        other objects. It then updates any of these parameter values that have been changed by the user.
+        It also handles any special cases.
         :param self: Reference the class instance (such as it is) from within the class
         :param model: The container class of the application, giving access to everything else, including the logger
         :return: None
@@ -565,35 +581,48 @@ class Reservoir:
         """
         model.logger.info("Init " + str(__class__) + ": " + sys._getframe().f_code.co_name)
 
-        # Deal with all the parameter values that the user has provided.  They should really only provide values that they want to change from the default values, but they can provide a value that is already set because it is a defaulr value set in __init__.  It will ignore those.
-        # This also deals with all the special cases that need to be talen care of after a vlaue has been read in and checked.
-        # If you choose to sublass this master class, you can also choose to override this method (or not), and if you do, do it before or after you call you own version of this method.  If you do, you can also choose to call this method from you class, which can effectively modify all these superclass parameters in your class.
+        # Deal with all the parameter values that the user has provided.  They should really only provide values
+        # that they want to change from the default values, but they can provide a value that is already set
+        # because it is a default value set in __init__.  It will ignore those.
+        # This also deals with all the special cases that need to be taken care of
+        # after a value has been read in and checked.
+        # If you choose to subclass this master class, you can also choose to override this method (or not),
+        # and if you do, do it before or after you call you own version of this method.  If you do, you can
+        # also choose to call this method from you class, which can effectively modify all these
+        # superclass parameters in your class.
 
         if len(model.InputParameters) > 0:
-            # loop thru all the parameters that the user wishes to set, looking for parameters that match this object
+            # loop through all the parameters that the user wishes to set, looking for parameters that match this object
             for item in self.ParameterDict.items():
                 ParameterToModify = item[1]
                 key = ParameterToModify.Name.strip()
                 if key in model.InputParameters:
                     ParameterReadIn = model.InputParameters[key]
-                    ParameterToModify.CurrentUnits = ParameterToModify.PreferredUnits  # Before we change the paremeter, let's assume that the unit preferences will match - if they don't, the later code will fix this.
-                    ReadParameter(ParameterReadIn, ParameterToModify,
-                                  model)  # this should handle all the non-special cases
+                    # Before we change the parameter, let's assume that the unit preferences will match -
+                    # if they don't, the later code will fix this.
+                    ParameterToModify.CurrentUnits = ParameterToModify.PreferredUnits
+                    ReadParameter(ParameterReadIn, ParameterToModify, model)  # this handles all non-special cases
 
                     # handle special cases
                     if ParameterToModify.Name == "Reservoir Model":
                         if ParameterReadIn.sValue == '1':
-                            ParameterToModify.value = ReservoirModel.MULTIPLE_PARALLEL_FRACTURES  # Multiple parallel fractures model (LANL)
+                            # Multiple parallel fractures model (LANL)
+                            ParameterToModify.value = ReservoirModel.MULTIPLE_PARALLEL_FRACTURES
                         elif ParameterReadIn.sValue == '2':
-                            ParameterToModify.value = ReservoirModel.LINEAR_HEAT_SWEEP  # Volumetric block model (1D linear heat sweep model (Stanford))
+                            # Volumetric block model (1D linear heat sweep model (Stanford))
+                            ParameterToModify.value = ReservoirModel.LINEAR_HEAT_SWEEP
                         elif ParameterReadIn.sValue == '3':
-                            ParameterToModify.value = ReservoirModel.SINGLE_FRACTURE  # Drawdown parameter model (Tester)
+                            # Drawdown parameter model (Tester)
+                            ParameterToModify.value = ReservoirModel.SINGLE_FRACTURE
                         elif ParameterReadIn.sValue == '4':
-                            ParameterToModify.value = ReservoirModel.ANNUAL_PERCENTAGE  # Thermal drawdown percentage model (GETEM)
+                            # Thermal drawdown percentage model (GETEM)
+                            ParameterToModify.value = ReservoirModel.ANNUAL_PERCENTAGE
                         elif ParameterReadIn.sValue == '5':
-                            ParameterToModify.value = ReservoirModel.USER_PROVIDED_PROFILE  # Generic user-provided temperature profile
+                            # Generic user-provided temperature profile
+                            ParameterToModify.value = ReservoirModel.USER_PROVIDED_PROFILE
                         else:
-                            ParameterToModify.value = ReservoirModel.TOUGH2_SIMULATOR  # TOUGH2 is called
+                            # TOUGH2 is called
+                            ParameterToModify.value = ReservoirModel.TOUGH2_SIMULATOR
 
                     elif ParameterToModify.Name == "Reservoir Depth":
                         ParameterToModify.value = ParameterToModify.value * 1000
@@ -613,20 +642,26 @@ class Reservoir:
                         if ParameterToModify.value == ReservoirVolume.RES_VOL_ONLY and ParameterToModify.value in [
                             ReservoirModel.MULTIPLE_PARALLEL_FRACTURES, ReservoirModel.LINEAR_HEAT_SWEEP]:
                             ParameterToModify.value = ReservoirVolume.RES_VOL_FRAC_NUM
-                            print(
-                                "Warning: If user-selected reservoir model is 1 or 2, then user-selected reservoir volume option cannot be 4 but should be 1, 2, or 3. GEOPHIRES will assume reservoir volume option 3.")
-                            model.logger.warning(
-                                "If user-selected reservoir model is 1 or 2, then user-selected reservoir volume option cannot be 4 but should be 1, 2, or 3. GEOPHIRES will assume reservoir volume option 3.")
+                            print("Warning: If user-selected reservoir model is 1 or 2, then user-selected \
+                            reservoir volume option cannot be 4 but should be 1, 2, or 3. GEOPHIRES will assume \
+                            reservoir volume option 3.")
+                            model.logger.warning("If user-selected reservoir model is 1 or 2, then user-selected \
+                            reservoir volume option cannot be 4 but should be 1, 2, or 3. GEOPHIRES will assume \
+                            reservoir volume option 3.")
 
                     elif ParameterToModify.Name == "Fracture Shape":
                         if ParameterReadIn.sValue == '1':
-                            ParameterToModify.value = FractureShape.CIRCULAR_AREA  # fracshape = 1  Circular fracture with known area
+                            # fracshape = 1  Circular fracture with known area
+                            ParameterToModify.value = FractureShape.CIRCULAR_AREA
                         elif ParameterReadIn.sValue == '2':
-                            ParameterToModify.value = FractureShape.CIRCULAR_DIAMETER  # fracshape = 2  Circular fracture with known diameter
+                            # fracshape = 2  Circular fracture with known diameter
+                            ParameterToModify.value = FractureShape.CIRCULAR_DIAMETER
                         elif ParameterReadIn.sValue == '3':
-                            ParameterToModify.value = FractureShape.SQUARE  # fracshape = 3  Square fracture
+                            # fracshape = 3  Square fracture
+                            ParameterToModify.value = FractureShape.SQUARE
                         else:
-                            ParameterToModify.value = FractureShape.RECTANGULAR  # fracshape = 4  Rectangular fracture
+                            # fracshape = 4  Rectangular fracture
+                            ParameterToModify.value = FractureShape.RECTANGULAR
 
                     elif ParameterToModify.Name.startswith("Gradient"):
                         parts = ParameterReadIn.Name.split(' ')
@@ -636,8 +671,9 @@ class Reservoir:
                             model.reserv.gradient.value[position] = model.reserv.gradient.value[
                                                                         position] / 1000.0  # convert C/m
                             model.reserv.gradient.CurrentUnits = TemperatureGradientUnit.DEGREESCPERM
-                        if model.reserv.gradient.value[position] < 1e-6: model.reserv.gradient.value[
-                            position] = 1e-6  # convert 0 C/m gradients to very small number, avoids divide by zero errors later
+                        if model.reserv.gradient.value[position] < 1e-6:
+                            # convert 0 C/m gradients to very small number, avoids divide by zero errors later
+                            model.reserv.gradient.value[position] = 1e-6
 
                     elif ParameterToModify.Name.startswith("Thickness"):
                         parts = ParameterReadIn.Name.split(' ')
@@ -647,8 +683,8 @@ class Reservoir:
                             model.reserv.layerthickness.value[position] = model.reserv.layerthickness.value[
                                                                               position] * 1000.0  # convert m
                             model.reserv.layerthickness.CurrentUnits = LengthUnit.METERS
-                        model.reserv.layerthickness.value[
-                            position + 1] = 100_000.0  # set thickness of bottom segment to large number to override lower, unused segments
+                        # set thickness of bottom segment to large number to override lower, unused segments
+                        model.reserv.layerthickness.value[position + 1] = 100_000.0
 
                     elif ParameterToModify.Name.startswith("Fracture Separation"):
                         self.fracsepcalc.value = self.fracsep.value
@@ -681,8 +717,12 @@ class Reservoir:
         model.logger.info("Init " + str(__class__) + ": " + sys._getframe().f_code.co_name)
 
         # This is where all the calculations are made using all the values that have been set.
-        # If you sublcass this class, you can choose to run these calculations before (or after) your calculations, but that assumes you have set all the values that are required for these calculations
-        # If you choose to sublass this master class, you can also choose to override this method (or not), and if you do, do it before or after you call you own version of this method.  If you do, you can also choose to call this method from you class, which can effectively run the calculations of the superclass, making all thr values available to your methods. but you had n=betteer have set all the paremeters!.
+        # If you subclass this class, you can choose to run these calculations before (or after) your calculations,
+        # but that assumes you have set all the values that are required for these calculations
+        # If you choose to subclass this master class, you can also choose to override this method (or not),
+        # and if you do, do it before or after you call you own version of this method.  If you do, you can also
+        # choose to call this method from you class, which can effectively run the calculations of the superclass,
+        # making all thr values available to your methods. but you had n better set all the parameters!
 
         # calculate fracture geometry
         if self.fracshape.value == FractureShape.CIRCULAR_AREA:
@@ -714,12 +754,14 @@ class Reservoir:
             maxdepth = 0
             intersecttemperature[0] = self.Tsurf.value + self.gradient.value[0] * self.layerthickness.value[0]
             for i in range(1, self.numseg.value - 1):
-                intersecttemperature[i] = intersecttemperature[i - 1] + self.gradient.value[i] * self.layerthickness.value[i]
+                intersecttemperature[i] = intersecttemperature[i - 1] + self.gradient.value[i] * \
+                                          self.layerthickness.value[i]
             layerindex = next(loc for loc, val in enumerate(intersecttemperature) if val > self.Tmax.value)
             if layerindex > 0:
                 for i in range(0, layerindex):
                     maxdepth = maxdepth + self.layerthickness.value[i]
-                maxdepth = maxdepth + (self.Tmax.value - intersecttemperature[layerindex - 1]) / self.gradient.value[layerindex]
+                maxdepth = maxdepth + (self.Tmax.value - intersecttemperature[layerindex - 1]) / self.gradient.value[
+                    layerindex]
             else:
                 maxdepth = (self.Tmax.value - self.Tsurf.value) / self.gradient.value[0]
 
@@ -729,9 +771,9 @@ class Reservoir:
         # calculate initial reservoir temperature
         intersecttemperature = [self.Tsurf.value] + intersecttemperature
         totaldepth = np.append(np.array([0.0]), np.cumsum(self.layerthickness.value))
-        temperatureindex = max(loc for loc, val in enumerate(self.depth.value > totaldepth) if val == True)
-        self.Trock.value = intersecttemperature[temperatureindex] + self.gradient.value[temperatureindex] * (
-            self.depth.value - totaldepth[temperatureindex])
+        temperatureindex = max(loc for loc, val in enumerate(self.depth.value > totaldepth) if val is True)
+        self.Trock.value = intersecttemperature[temperatureindex] + self.gradient.value[temperatureindex] * \
+                           (self.depth.value - totaldepth[temperatureindex])
 
         # calculate average geothermal gradient
         if self.numseg.value == 1:
@@ -741,7 +783,7 @@ class Reservoir:
 
         # specify time-stepping vectors
         self.timevector.value = np.linspace(0, model.surfaceplant.plantlifetime.value,
-                                            model.economics.timestepsperyear.value * model.surfaceplant.plantlifetime.value)
+                                        model.economics.timestepsperyear.value * model.surfaceplant.plantlifetime.value)
         self.Tresoutput.value = np.zeros(len(self.timevector.value))
 
         # calculate reservoir water properties
