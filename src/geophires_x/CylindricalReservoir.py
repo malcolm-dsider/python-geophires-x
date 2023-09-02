@@ -13,10 +13,10 @@ from Reservoir import Reservoir
 class CylindricalReservoir(Reservoir):
     def __init__(self, model:Model):
         """
-        The __init__ function is called automatically when a class is instantiated. 
-        It initializes the attributes of an object, and sets default values for certain arguments that can be overridden by user input. 
+        The __init__ function is called automatically when a class is instantiated.
+        It initializes the attributes of an object, and sets default values for certain arguments that can be overridden by user input.
         The __init__ function is used to set up all the parameters in the Reservoir.
-        
+
         :param self: Store data that will be used by the class
         :param model: The container class of the application, giving access to everything else, including the logger
         :return: None
@@ -47,7 +47,7 @@ class CylindricalReservoir(Reservoir):
         self.SurfaceArea = self.OutputParameterDict[self.SurfaceArea.Name] = OutputParameter("Cylindrical Reservoir Surface Area", value = 759.6371, UnitType = Units.AREA, PreferredUnits = AreaUnit.METERS2, CurrentUnits = AreaUnit.METERS2)
         self.averagegradient = self.OutputParameterDict[self.averagegradient.Name] = floatParameter("averagegradient", value = 0.0, UnitType = Units.NONE)
         self.timevector = self.OutputParameterDict[self.timevector.Name] = OutputParameter(Name = "Time Vector", value=[], UnitType = Units.NONE)
-        self.Tresoutput = self.OutputParameterDict[self.Tresoutput.Name] = OutputParameter(Name = "Reservoir Temperature History", value=[], UnitType = Units.TEMPERATURE, PreferredUnits = TemperatureUnit.CELCIUS, CurrentUnits = TemperatureUnit.CELCIUS)
+        self.Tresoutput = self.OutputParameterDict[self.Tresoutput.Name] = OutputParameter(Name = "Reservoir Temperature History", value=[], UnitType = Units.TEMPERATURE, PreferredUnits = TemperatureUnit.CELSIUS, CurrentUnits = TemperatureUnit.CELSIUS)
 
         model.logger.info("Complete " + str(__class__) + ": " + sys._getframe().f_code.co_name)
 
@@ -56,10 +56,10 @@ class CylindricalReservoir(Reservoir):
 
     def read_parameters(self, model:Model) -> None:
         """
-        The read_parameters function reads in the parameters from a dictionary created by reading the user-provided file and updates the parameter values for this object. 
-        
+        The read_parameters function reads in the parameters from a dictionary created by reading the user-provided file and updates the parameter values for this object.
+
         The function reads in all of the parameters that relate to this object, including those that are inherited from other objects. It then updates any of these parameter values that have been changed by the user.  It also handles any special cases.
-        
+
         :param self: Reference the class instance (such as it is) from within the class
         :param model: The container class of the application, giving access to everything else, including the logger
         :return: None
@@ -93,7 +93,7 @@ class CylindricalReservoir(Reservoir):
         """
         The Calculate function is where all the calculations are done.
         This function can be called multiple times, and will only recalculate what has changed each time it is called.
-        
+
         :param self: Access variables that belongs to the class
         :param model: The container class of the application, giving access to everything else, including the logger
         :return: Nothing, but it does make calculations and set values in the model

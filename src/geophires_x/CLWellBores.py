@@ -285,8 +285,8 @@ class CLWellBores(WellBores.WellBores):
             Name="Horizontal Produced Temperature",
             value=[0.0],
             UnitType=Units.TEMPERATURE,
-            PreferredUnits=TemperatureUnit.CELCIUS,
-            CurrentUnits=TemperatureUnit.CELCIUS
+            PreferredUnits=TemperatureUnit.CELSIUS,
+            CurrentUnits=TemperatureUnit.CELSIUS
         )
         self.HorizontalProducedTemperature.value = [
                                                        0.0] * model.surfaceplant.plantlifetime.value  # initialize the array

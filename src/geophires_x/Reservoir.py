@@ -100,8 +100,8 @@ class Reservoir:
             Min=50,
             Max=400,
             UnitType=Units.TEMPERATURE,
-            PreferredUnits=TemperatureUnit.CELCIUS,
-            CurrentUnits=TemperatureUnit.CELCIUS,
+            PreferredUnits=TemperatureUnit.CELSIUS,
+            CurrentUnits=TemperatureUnit.CELSIUS,
             Required=True,
             ErrMessage="assume default maximum temperature (400 deg.C)",
             ToolTipText="Maximum allowable reservoir temperature (e.g. due to drill bit or logging tools constraints). \
@@ -448,8 +448,8 @@ class Reservoir:
             Min=-50,
             Max=50,
             UnitType=Units.TEMPERATURE,
-            PreferredUnits=TemperatureUnit.CELCIUS,
-            CurrentUnits=TemperatureUnit.CELCIUS,
+            PreferredUnits=TemperatureUnit.CELSIUS,
+            CurrentUnits=TemperatureUnit.CELSIUS,
             Required=True,
             ErrMessage="assume default surface temperature (15 deg.C)",
             ToolTipText="Surface temperature used for calculating bottom-hole temperature \
@@ -534,8 +534,8 @@ class Reservoir:
             Name="Bottom-hole temperature",
             value=-999.9,
             UnitType=Units.TEMPERATURE,
-            PreferredUnits=TemperatureUnit.CELCIUS,
-            CurrentUnits=TemperatureUnit.CELCIUS
+            PreferredUnits=TemperatureUnit.CELSIUS,
+            CurrentUnits=TemperatureUnit.CELSIUS
         )
 
         self.InitialReservoirHeatContent = self.OutputParameterDict[
@@ -557,8 +557,8 @@ class Reservoir:
             Name="Reservoir Temperature History",
             value=[],
             UnitType=Units.TEMPERATURE,
-            PreferredUnits=TemperatureUnit.CELCIUS,
-            CurrentUnits=TemperatureUnit.CELCIUS
+            PreferredUnits=TemperatureUnit.CELSIUS,
+            CurrentUnits=TemperatureUnit.CELSIUS
         )
 
         model.logger.info(f'Complete {str(__class__)}: {sys._getframe().f_code.co_name}')

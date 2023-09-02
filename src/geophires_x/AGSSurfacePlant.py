@@ -180,8 +180,8 @@ class AGSSurfacePlant(SurfacePlant.SurfacePlant):
             Min=0.0,
             Max=15.0,
             UnitType=Units.TEMPERATURE,
-            PreferredUnits=TemperatureUnit.CELCIUS,
-            CurrentUnits=TemperatureUnit.CELCIUS,
+            PreferredUnits=TemperatureUnit.CELSIUS,
+            CurrentUnits=TemperatureUnit.CELSIUS,
             Required=False,
             ErrMessage="assume default CO2 temperature decline with cooling after turbine and before compressor (12 degC)")
         self.Turbine_outlet_pressure = self.ParameterDict[self.Turbine_outlet_pressure.Name] = floatParameter(
@@ -277,8 +277,8 @@ class AGSSurfacePlant(SurfacePlant.SurfacePlant):
             Name="Average Production Temperature",
             value=-999.0,
             UnitType=Units.TEMPERATURE,
-            PreferredUnits=TemperatureUnit.CELCIUS,
-            CurrentUnits=TemperatureUnit.CELCIUS
+            PreferredUnits=TemperatureUnit.CELSIUS,
+            CurrentUnits=TemperatureUnit.CELSIUS
         )
         model.logger.info("complete " + str(__class__) + ": " + sys._getframe().f_code.co_name)
 

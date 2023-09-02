@@ -95,7 +95,7 @@ class AGSOutputs(Outputs.Outputs):
                     f.write(f"      Wellbore Diameter:                                      " + "{0:.4f}".format((
                         model.wellbores.prodwelldiam.value)) + " " + model.wellbores.prodwelldiam.CurrentUnits.value + NL)
                     f.write(f"      Injection Temperature:                                 " + "{0:.1f}".format(
-                        model.wellbores.Tinj.value) + " " + TemperatureUnit.CELCIUS.value + NL)
+                        model.wellbores.Tinj.value) + " " + TemperatureUnit.CELSIUS.value + NL)
                     f.write(f"      Thermal Conductivity:                                   " + "{0:.2f}".format(
                         model.reserv.krock.value) + " " + model.reserv.krock.CurrentUnits.value + NL)
 

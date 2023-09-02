@@ -153,8 +153,8 @@ class HIP_RA:
             Min=50,
             Max=1000,
             UnitType=Units.TEMPERATURE,
-            PreferredUnits=TemperatureUnit.CELCIUS,
-            CurrentUnits=TemperatureUnit.CELCIUS,
+            PreferredUnits=TemperatureUnit.CELSIUS,
+            CurrentUnits=TemperatureUnit.CELSIUS,
             Required=True,
             ErrMessage="assume default reservoir temperature (150 deg-C)",
             ToolTipText="Reservoir Temperature [150 dec-C]"
@@ -165,8 +165,8 @@ class HIP_RA:
             Min=0.1,
             Max=200,
             UnitType=Units.TEMPERATURE,
-            PreferredUnits=TemperatureUnit.CELCIUS,
-            CurrentUnits=TemperatureUnit.CELCIUS,
+            PreferredUnits=TemperatureUnit.CELSIUS,
+            CurrentUnits=TemperatureUnit.CELSIUS,
             Required=True,
             ErrMessage="assume default rejection temperature (25 deg-C)",
             ToolTipText="Rejection Temperature [25 dec-C]"

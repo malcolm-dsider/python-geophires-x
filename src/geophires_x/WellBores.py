@@ -507,8 +507,8 @@ class WellBores:
             Min=-5.,
             Max=50.,
             UnitType=Units.TEMPERATURE,
-            PreferredUnits=TemperatureUnit.CELCIUS,
-            CurrentUnits=TemperatureUnit.CELCIUS,
+            PreferredUnits=TemperatureUnit.CELSIUS,
+            CurrentUnits=TemperatureUnit.CELSIUS,
             ErrMessage="assume default production wellbore temperature drop (5 deg.C)",
             ToolTipText="Specify constant production well geofluid temperature drop in case Rameys model is disabled."
         )
@@ -519,8 +519,8 @@ class WellBores:
             Min=-5.,
             Max=50.,
             UnitType=Units.TEMPERATURE,
-            PreferredUnits=TemperatureUnit.CELCIUS,
-            CurrentUnits=TemperatureUnit.CELCIUS,
+            PreferredUnits=TemperatureUnit.CELSIUS,
+            CurrentUnits=TemperatureUnit.CELSIUS,
             ErrMessage="assume default injection wellbore temperature gain (0 deg.C)",
             ToolTipText="Specify constant injection well geofluid temperature gain."
         )
@@ -569,8 +569,8 @@ class WellBores:
             Min=0.,
             Max=200.,
             UnitType=Units.TEMPERATURE,
-            PreferredUnits=TemperatureUnit.CELCIUS,
-            CurrentUnits=TemperatureUnit.CELCIUS,
+            PreferredUnits=TemperatureUnit.CELSIUS,
+            CurrentUnits=TemperatureUnit.CELSIUS,
             Required=True,
             ErrMessage="assume default injection temperature (70 deg.C)",
             ToolTipText="Constant geofluid injection temperature at injection wellhead."
@@ -713,8 +713,8 @@ class WellBores:
             Name="Production Well Temperature Drop",
             value=[0.0],
             UnitType=Units.TEMPERATURE,
-            PreferredUnits=TemperatureUnit.CELCIUS,
-            CurrentUnits=TemperatureUnit.CELCIUS
+            PreferredUnits=TemperatureUnit.CELSIUS,
+            CurrentUnits=TemperatureUnit.CELSIUS
         )
         self.DPOverall = self.OutputParameterDict[self.DPOverall.Name] = OutputParameter(
             Name="Total Pressure Drop",
@@ -755,8 +755,8 @@ class WellBores:
             Name="Produced Temperature",
             value=[0.0],
             UnitType=Units.TEMPERATURE,
-            PreferredUnits=TemperatureUnit.CELCIUS,
-            CurrentUnits=TemperatureUnit.CELCIUS
+            PreferredUnits=TemperatureUnit.CELSIUS,
+            CurrentUnits=TemperatureUnit.CELSIUS
         )
         self.PumpingPower = self.OutputParameterDict[self.PumpingPower.Name] = OutputParameter(
             Name="Pumping Power",

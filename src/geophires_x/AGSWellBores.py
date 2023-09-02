@@ -487,8 +487,8 @@ class AGSWellBores(WellBores.WellBores):
             Name="Nonvertical Produced Temperature",
             value=[0.0],
             UnitType=Units.TEMPERATURE,
-            PreferredUnits=TemperatureUnit.CELCIUS,
-            CurrentUnits=TemperatureUnit.CELCIUS
+            PreferredUnits=TemperatureUnit.CELSIUS,
+            CurrentUnits=TemperatureUnit.CELSIUS
         )
         self.NonverticalProducedTemperature.value = [
                                                         0.0] * model.surfaceplant.plantlifetime.value  # initialize the array
