@@ -3,6 +3,7 @@ import os
 import math
 import numpy as np
 from .Parameter import floatParameter, intParameter, boolParameter, OutputParameter, ReadParameter
+from .Reservoir import densitywater, viscositywater
 from .Units import *
 import geophires_x.Model as Model
 from .OptionList import ReservoirModel
@@ -79,8 +80,8 @@ def WellPressureDrop(model: Model, Taverage: float, wellflowrate: float, welldia
     """
     # start by calculating wellbore fluid conditions [kPa], noting that most temperature drop happens
     # in upper section (because surrounding rock temperature is lowest in upper section)
-    rhowater = model.reserv.densitywater(Taverage)  # replace with correlation based on Tprodaverage
-    muwater = model.reserv.viscositywater(Taverage)  # replace with correlation based on Tprodaverage
+    rhowater = densitywater(Taverage)  # replace with correlation based on Tprodaverage
+    muwater = viscositywater(Taverage)  # replace with correlation based on Tprodaverage
     v = wellflowrate / rhowater / (math.pi / 4. * welldiam ** 2)
     Rewater = 4.0 * wellflowrate / (muwater * math.pi * welldiam)  # laminar or turbulent flow?
     Rewateraverage = np.average(Rewater)
@@ -105,7 +106,7 @@ def WellPressureDrop(model: Model, Taverage: float, wellflowrate: float, welldia
     return DPWell, f3, v, rhowater
 
 
-def InjectionWellPressureDrop(self, model: Model, Taverage: float, wellflowrate: float, welldiam: float,
+def InjectionWellPressureDrop(model: Model, Taverage: float, wellflowrate: float, welldiam: float,
                               impedancemodelused: bool, depth: float, nprod: int, ninj: int, waterloss: float) -> tuple:
     """
     calculate the injection well pressure drop over the length of the well due to friction or impedance
@@ -124,9 +125,9 @@ def InjectionWellPressureDrop(self, model: Model, Taverage: float, wellflowrate:
     """
     # start by calculating wellbore fluid conditions [kPa], noting that most temperature drop happens in
     # upper section (because surrounding rock temperature is lowest in upper section)
-    rhowater = model.reserv.densitywater(Taverage) * np.linspace(1, 1, len(self.ProducedTemperature.value))
+    rhowater = densitywater(Taverage) * np.linspace(1, 1, len(model.wellbores.ProducedTemperature.value))
     # replace with correlation based on Tinjaverage
-    muwater = model.reserv.viscositywater(Taverage) * np.linspace(1, 1, len(self.ProducedTemperature.value))
+    muwater = viscositywater(Taverage) * np.linspace(1, 1, len(model.wellbores.ProducedTemperature.value))
     v = nprod / ninj * wellflowrate * (1.0 + waterloss) / rhowater / (math.pi / 4. * welldiam ** 2)
     Rewater = 4. * nprod / ninj * wellflowrate * (1.0 + waterloss) / (
         muwater * math.pi * welldiam)  # laminar or turbulent flow?
@@ -265,8 +266,7 @@ def ProdPressureDropAndPumpingPowerUsingIndexes(model: Model, usebuiltinhydrosta
     if usebuiltinhydrostaticpressurecorrelation:
         CP = 4.64E-7
         CT = 9E-4 / (30.796 * Trock ** (-0.552))
-        Phydrostaticcalc = 0 + 1. / CP * (math.exp(
-            model.reserv.densitywater(Tsurf) * 9.81 * CP / 1000 * (depth - CT / 2 * gradient * depth ** 2)) - 1)
+        Phydrostaticcalc = 0 + 1. / CP * (math.exp(densitywater(Tsurf) * 9.81 * CP / 1000 * (depth - CT / 2 * gradient * depth ** 2)) - 1)
 
     if productionwellpumping:
         # [kPa] = 50 psi. Excess pressure covers non-condensable gas pressure and net positive suction head for the pump
@@ -360,8 +360,7 @@ def InjPressureDropAndPumpingPowerUsingIndexes(model: Model, usebuiltinhydrostat
     if usebuiltinhydrostaticpressurecorrelation:
         CP = 4.64E-7
         CT = 9E-4 / (30.796 * Trock ** (-0.552))
-        Phydrostaticcalc = 0 + 1. / CP * (math.exp(
-            model.reserv.densitywater(Tsurf) * 9.81 * CP / 1000 * (depth - CT / 2 * gradient * depth ** 2)) - 1)
+        Phydrostaticcalc = 0 + 1. / CP * (math.exp(densitywater(Tsurf) * 9.81 * CP / 1000 * (depth - CT / 2 * gradient * depth ** 2)) - 1)
 
     if productionwellpumping:
         # [kPa] = 50 psi. Excess pressure covers non-condensable gas pressure and net positive suction head for the pump
@@ -904,7 +903,7 @@ class WellBores:
             model.reserv.depth.value, self.nprod.value, self.ninj.value, model.reserv.waterloss.value)
 
         if self.impedancemodelused.value:  # assumed everything stays liquid throughout, based on TARB in Geophires v1.2
-            rhowaterreservoir = model.reserv.densitywater(0.1 * self.Tinj.value + 0.9 * model.reserv.Tresoutput.value)
+            rhowaterreservoir = densitywater(0.1 * self.Tinj.value + 0.9 * model.reserv.Tresoutput.value)
             self.DPOverall.value, self.PumpingPower.value, self.DPProdWell.value, self.DPReserv.value, self.DPBouyancy.value = \
                 ProdPressureDropsAndPumpingPowerUsingImpedenceModel(f3, vprod, self.rhowaterinj, self.rhowaterprod,
                                                                     model.reserv.rhowater.value,

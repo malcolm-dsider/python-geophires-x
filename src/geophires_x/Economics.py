@@ -4,9 +4,9 @@ import os
 import numpy as np
 import numpy_financial as npf
 import geophires_x.Model as Model
-from OptionList import Configuration, WellDrillingCostCorrelation, EconomicModel, EndUseOptions, PowerPlantType
-from Parameter import intParameter, floatParameter, OutputParameter, ReadParameter, boolParameter
-from Units import *
+from .OptionList import Configuration, WellDrillingCostCorrelation, EconomicModel, EndUseOptions, PowerPlantType
+from .Parameter import intParameter, floatParameter, OutputParameter, ReadParameter, boolParameter
+from .Units import *
 
 
 def BuildPricingModel(plantlifetime: int, StartYear: int, StartPrice: float, EndPrice: float,
@@ -1410,8 +1410,8 @@ class Economics:
                                                (self.Nonvertical_drilling_cost_per_m.value * model.wellbores.Nonvertical_length.value))*1E-6
                             else:
                                 self.C1well = (2 * self.Vertical_drilling_cost_per_m.value * (model.reserv.depth.value * 1000.0)) * 1E-6
-                   else:  # Coaxial
-                    self.C1well = ((self.Vertical_drilling_cost_per_m.value * (model.reserv.depth.value*1000.0)) +
+                    else:  # Coaxial
+                        self.C1well = ((self.Vertical_drilling_cost_per_m.value * (model.reserv.depth.value*1000.0)) +
                                        (self.Nonvertical_drilling_cost_per_m.value * model.wellbores.Nonvertical_length.value))*1E-6
 
             elif self.wellcorrelation.value == WellDrillingCostCorrelation.VERTICAL_SMALL:
@@ -1744,7 +1744,7 @@ class Economics:
                                                self.Coam.value)
 
         # Calculate LCOE/LCOH
-        self.LCOE.value, self.LCOH.value = self.CalculateLCOELCOH(model)
+        self.LCOE.value, self.LCOH.value = CalculateLCOELCOH(self, model)
 
         model.logger.info("complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
 

@@ -10,34 +10,37 @@ from .Units import *
 import geophires_x.Model as Model
 
 
+# user-defined functions
+def densitywater(Twater) -> float:
+    T = Twater + 273.15
+    # water density correlation as used in Geophires v1.2 [kg/m3]
+    rhowater = (.7983223 + (1.50896E-3 - 2.9104E-6 * T) * T) * 1E3
+    return rhowater
+
+
+def viscositywater(Twater) -> float:
+    # accurate to within 2.5% from 0 to 370 degrees C [Ns/m2]
+    muwater = 2.414E-5 * np.power(10, 247.8 / (Twater + 273.15 - 140))
+    return muwater
+
+
+def heatcapacitywater(Twater) -> float:
+    # J/kg/K (based on TARB in Geophires v1.2)
+    Twater = (Twater + 273.15) / 1000
+    A = -203.6060
+    B = 1523.290
+    C = -3196.413
+    D = 2474.455
+    E = 3.855326
+    # water specific heat capacity in J/kg-K
+    cpwater = (A + B * Twater + C * Twater ** 2 + D * Twater ** 3 + E / (Twater ** 2)) / 18.02 * 1000
+    return cpwater
+
+
 class Reservoir:
     """
     This class is the parent class for modeling the Reservoir.
     """
-
-    # user-defined functions
-    def densitywater(self, Twater) -> float:
-        T = Twater + 273.15
-        rhowater = (.7983223 + (
-            1.50896E-3 - 2.9104E-6 * T) * T) * 1E3  # water density correlation as used in Geophires v1.2 [kg/m3]
-        return rhowater
-
-    def viscositywater(self, Twater) -> float:
-        muwater = 2.414E-5 * np.power(10, 247.8 / (
-            Twater + 273.15 - 140))  # accurate to within 2.5% from 0 to 370 degrees C [Ns/m2]
-        return muwater
-
-    def heatcapacitywater(self, Twater) -> float:
-        # J/kg/K (based on TARB in Geophires v1.2)
-        Twater = (Twater + 273.15) / 1000
-        A = -203.6060
-        B = 1523.290
-        C = -3196.413
-        D = 2474.455
-        E = 3.855326
-        cpwater = (A + B * Twater + C * Twater ** 2 + D * Twater ** 3 + E / (
-            Twater ** 2)) / 18.02 * 1000  # water specific heat capacity in J/kg-K
-        return cpwater
 
     def __init__(self, model: Model):
         """
@@ -63,8 +66,8 @@ class Reservoir:
         # If you do, you can also choose to call this method from you class, which will effectively add and set all
         # these parameters to your class.
 
-        # These dictionaries contains a list of all the parameters set in this object, stored as "Parameter" and
-        # OutputParameter Objects.  This will alow us later to access them in a user interface and get that list,
+        # These dictionaries contain a list of all the parameters set in this object, stored as "Parameter" and
+        # OutputParameter Objects.  This will allow us later to access them in a user interface and get that list,
         # along with unit type, preferred units, etc.
         self.ParameterDict = {}
         self.OutputParameterDict = {}
@@ -76,7 +79,9 @@ class Reservoir:
             AllowableRange=[0, 1, 2, 3, 4, 5, 6],
             Required=True,
             ErrMessage="run default reservoir model (Thermal Drawdown Percentage Model)",
-            ToolTipText="1: Multiple parallel fractures model, 2: 1D linear heat sweep model,  3: m/a single fracture drawdown model, 4: Linear thermal drawdown model, 5: Generic user-provided temperature profile, 6: TOUGH2"
+            ToolTipText="1: Multiple parallel fractures model, 2: 1D linear heat sweep model,  \
+            3: m/a single fracture drawdown model, 4: Linear thermal drawdown model, \
+            5: Generic user-provided temperature profile, 6: TOUGH2"
         )
 
         self.depth = self.ParameterDict[self.depth.Name] = floatParameter(
@@ -771,7 +776,9 @@ class Reservoir:
         # calculate initial reservoir temperature
         intersecttemperature = [self.Tsurf.value] + intersecttemperature
         totaldepth = np.append(np.array([0.0]), np.cumsum(self.layerthickness.value))
-        temperatureindex = max(loc for loc, val in enumerate(self.depth.value > totaldepth) if val is True)
+        temperatureindex = max(loc for loc, val in enumerate(self.depth.value > totaldepth) if val)
+
+#        temperatureindex = max(loc for loc, val in enumerate(self.depth.value > totaldepth) if val is True)
         self.Trock.value = intersecttemperature[temperatureindex] + self.gradient.value[temperatureindex] * \
                            (self.depth.value - totaldepth[temperatureindex])
 
@@ -787,17 +794,15 @@ class Reservoir:
         self.Tresoutput.value = np.zeros(len(self.timevector.value))
 
         # calculate reservoir water properties
-        self.cpwater.value = self.heatcapacitywater(
+        self.cpwater.value = heatcapacitywater(
             model.wellbores.Tinj.value * 0.5 + (self.Trock.value * 0.9 + model.wellbores.Tinj.value * 0.1) * 0.5)
-        self.rhowater.value = self.densitywater(
+        self.rhowater.value = densitywater(
             model.wellbores.Tinj.value * 0.5 + (self.Trock.value * 0.9 + model.wellbores.Tinj.value * 0.1) * 0.5)
 
         # temperature gain in injection wells
         model.wellbores.Tinj.value = model.wellbores.Tinj.value + model.wellbores.tempgaininj.value
 
-        # --------------------------------
         # calculate reservoir heat content
-        # --------------------------------
         self.InitialReservoirHeatContent.value = self.resvolcalc.value * self.rhorock.value * self.cprock.value * (
             self.Trock.value - model.wellbores.Tinj.value) / 1E15  # 10^15 J
 

@@ -14,7 +14,6 @@ from geophires_x_client.geophires_input_parameters import GeophiresInputParamete
 class HIP_RATestCase(unittest.TestCase):
     maxDiff = None
 
-
     def test_HIP_RA_examples(self):
         client = GeophiresXClient()
         example_files = self._list_test_files_dir(test_files_dir='examples')

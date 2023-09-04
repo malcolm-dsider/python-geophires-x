@@ -166,7 +166,7 @@ class EnergyDensityUnit(str, Enum):
     KWHPERMCF = "kWh/MCF"
 
 
-class MassPerTimeUnit(str, num):
+class MassPerTimeUnit(str, Enum):
     TONNEPERYEAR = "tonne/yr"
 
 
