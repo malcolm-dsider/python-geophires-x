@@ -2,19 +2,19 @@ import sys
 import AdvModel
 import Outputs
 import numpy as np
-NL="\n"
+NL = "\n"
+
 
 class OutputsCCUS(Outputs.Outputs):
     """description of class"""
     def PrintOutputs(self, model:AdvModel):
         model.logger.info("Init " + str(__class__) + ": " + sys._getframe().f_code.co_name)
 
-        if np.sum(model.ccuseconomics.CCUSRevenue.value) == 0: return   #don't bother if we have nothing to report.
+        if np.sum(model.ccuseconomics.CCUSRevenue.value) == 0:
+            return   # don't bother if we have nothing to report.
 
-        #now do CCUS output, which will append to the original output
-        #---------------------------------------
-        #write results to output file and screen
-        #---------------------------------------
+        # now do CCUS output, which will append to the original output
+        # write results to output file and screen
         try:
             outputfile = "HDR.out"
             if len(sys.argv) > 2: outputfile = sys.argv[2]
@@ -46,22 +46,22 @@ class OutputsCCUS(Outputs.Outputs):
                                              ")        ("+model.ccuseconomics.ProjectCummCashFlow.PreferredUnits.value+")"+NL);
                 i = 0
                 for i in range(0, model.addeconomics.ConstructionYears.value, 1):
-                    #construction years...
+                    # construction years...
                     f.write(f"   {i+1:3.0f}                                                                     {model.ccuseconomics.ProjectCashFlow.value[i]:5.2f}           {model.ccuseconomics.ProjectCummCashFlow.value[i]:5.2f}"    + NL)
                     i = i + 1
-                
+
                 ii=0
                 for ii in range(0, model.surfaceplant.plantlifetime.value, 1):
-                    #running years...
+                    # running years...
                     f.write(f"   {ii+1+model.addeconomics.ConstructionYears.value:3.0f}  {model.ccuseconomics.CarbonThatWouldHaveBeenProducedAnnually.value[ii]:5.3f}  {model.ccuseconomics.CCUSPrice.value[ii]:5.3f}   {model.ccuseconomics.CCUSRevenue.value[ii]:5.2f}             {model.ccuseconomics.CCUSCashFlow.value[ii]:5.2f}        {model.ccuseconomics.CCUSCummCashFlow.value[ii]:5.2f}          {model.ccuseconomics.ProjectCashFlow.value[ii+model.addeconomics.ConstructionYears.value]:5.2f}           {model.ccuseconomics.ProjectCummCashFlow.value[ii+model.addeconomics.ConstructionYears.value]:5.2f}"    + NL)
                     ii = ii + 1
-                    
+
         except BaseException as ex:
             tb = sys.exc_info()[2]
-            print (str(ex))
+            print str(ex)
             print("Error: GEOPHIRES failed to Failed to write the output file.  Exiting....Line %i" % tb.tb_lineno)
             model.logger.critical(str(ex))
             model.logger.critical("Error: GEOPHIRES failed to Failed to write the output file.  Exiting....Line %i" % tb.tb_lineno)
             sys.exit()
 
-        model.logger.info("Complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
+        model.logger.info("Complete " + str(__class__) + ": " + sys._getframe().f_code.co_name)

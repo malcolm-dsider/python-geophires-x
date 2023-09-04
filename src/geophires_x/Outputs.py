@@ -13,9 +13,9 @@ class Outputs:
     def __init__(self, model:Model):
         """
         The __init__ function is called automatically when a class is instantiated.
-        It initializes the attributes of an object, and sets default values for certain arguments that can be overridden by user input.
+        It initializes the attributes of an object, and sets default values for certain arguments that can be
+        overridden by user input.
         The __init__ function is used to set up all the parameters in the Outputs.
-
         :param self: Store data that will be used by the class
         :param model: The container class of the application, giving access to everything else, including the logger
         :return: None
@@ -24,7 +24,8 @@ class Outputs:
 
         model.logger.info("Init " + str(__class__) + ": " + sys._getframe().f_code.co_name)
 
-        #Dictionary to hold the Units definations that the user wants for outputs created by GEOPHIRES.  It is empty by default initially - this will expand as the user desires are read from the inout file
+        # Dictionary to hold the Units definitions that the user wants for outputs created by GEOPHIRES.
+        # It is empty by default initially - this will expand as the user desires are read from the input file
         self.ParameterDict = {}
         self.printoutput = True
 
@@ -35,56 +36,66 @@ class Outputs:
 
     def read_parameters(self, model:Model) -> None:
         """
-        The read_parameters function reads in the parameters from a dictionary and stores them in the aparmeters.  It also handles special cases that need to be handled after a value has been read in and checked.  If you choose to sublass this master class, you can also choose to override this method (or not), and if you do
-
+        The read_parameters function reads in the parameters from a dictionary and stores them in the parameters.
+        It also handles special cases that need to be handled after a value has been read in and checked.
+        If you choose to subclass this master class, you can also choose to override this method (or not), and if you do
         :param self: Access variables that belong to a class
         :param model: The container class of the application, giving access to everything else, including the logger
-
         :return: None
         :doc-author: Malcolm Ross
-
+        #Deal with all the parameter values that the user has provided.  They should really only provide values that
+        they want to change from the default values, but they can provide a value that is already set because it is a
+        default value set in __init__.  It will ignore those.
+        #This also deals with all the special cases that need to be taken care of after a value has been read in
+        and checked.
+        #If you choose to subclass this master class, you can also choose to override this method (or not),
+        and if you do, do it before or after you call you own version of this method.  If you do, you can also choose
+        to call this method from you class, which can effectively modify all these superclass parameters in your class.
+        """
         model.logger.info("Init " + str(__class__) + ": " + sys._getframe().f_code.co_name)
 
-        #Deal with all the parameter values that the user has provided.  They should really only provide values that they want to change from the default values, but they can provide a value that is already set because it is a defaulr value set in __init__.  It will ignore those.
-        #This also deals with all the special cases that need to be talen care of after a vlaue has been read in and checked.
-        #If you choose to sublass this master class, you can also choose to override this method (or not), and if you do, do it before or after you call you own version of this method.  If you do, you can also choose to call this method from you class, which can effectively modify all these superclass parameters in your class.
-        """
-
         if len(model.InputParameters) > 0:
-            #if the user wants it, we need to know if the user wants to copy the contents of the output file to the screen - this serves as the screen report
+            # if the user wants it, we need to know if the user wants to copy the contents of the
+            # output file to the screen - this serves as the screen report
             if "Print Output to Console" in model.InputParameters:
                 ParameterReadIn = model.InputParameters["Print Output to Console"]
-                if ParameterReadIn.sValue == "0": self.printoutput = False
+                if ParameterReadIn.sValue == "0":
+                    self.printoutput = False
 
-            #loop thru all the parameters that the user wishes to set, looking for parameters that contain the prefix "Units:" - that means we want to set a special case for converting this output parameter to new units
+            # loop through all the parameters that the user wishes to set, looking for parameters that contain the
+            # prefix "Units:" - that means we want to set a special case for converting this
+            # output parameter to new units
             for key in model.InputParameters.keys():
                 if key.startswith("Units:"):
                     self.ParameterDict[key.replace("Units:", "")] = LookupUnits(model.InputParameters[key].sValue)[0]
 
-                    #handle special cases
+                    # handle special cases
 
         model.logger.info("Complete "+ str(__class__) + ": " + sys._getframe().f_code.co_name)
 
     def PrintOutputs(self, model:Model):
         """
         PrintOutputs writes the standard outputs to the output file.
-
         Args:
             model (Model): The container class of the application, giving access to everything else, including the logger
         """
         model.logger.info("Init " + str(__class__) + ": " + sys._getframe().f_code.co_name)
 
-        #Deal with converting Units back to PreferredUnits, if required.
-        #before we write the outputs, we go thru all the parameters for all of the objects and set the values back to the units that the user entered the data in
-        #We do this because the value may be displayed in the output, and we want the user to recginze their value, not some converted value
+        # Deal with converting Units back to PreferredUnits, if required.
+        # before we write the outputs, we go thru all the parameters for all of the objects and set the values back
+        # to the units that the user entered the data in
+        # We do this because the value may be displayed in the output, and we want the user to recginze their value,
+        # not some converted value
         for obj in [model.reserv, model.wellbores, model.surfaceplant, model.economics]:
             for key in obj.ParameterDict:
                 param = obj.ParameterDict[key]
                 if not param.UnitsMatch: ConvertUnitsBack(param, model)
 
-        #now we need to loop thru all thw output parameters to update their units to whatever units the user has specified.
-        #i.e., they may have specified that all LENGTH results must be in feet, so we need to convert those from whatver LENGTH unit they are to feet.
-        #same for all the other classes of units (TEMPERATURE, DENSITY, etc).
+        # now we need to loop through all thw output parameters to update their units to
+        # whatever units the user has specified.
+        # i.e., they may have specified that all LENGTH results must be in feet, so we need to convert those
+        # from whatever LENGTH unit they are to feet.
+        # same for all the other classes of units (TEMPERATURE, DENSITY, etc).
 
         for obj in [model.reserv, model.wellbores, model.surfaceplant, model.economics]:
             for key in obj.OutputParameterDict:
@@ -92,9 +103,8 @@ class Outputs:
                     if self.ParameterDict[key] != obj.OutputParameterDict[key].CurrentUnits:
                         ConvertOutputUnits(obj.OutputParameterDict[key], self.ParameterDict[key], model)
 
-        #---------------------------------------
-        #write results to output file and screen
-        #---------------------------------------
+        # write results to output file and screen
+
         try:
             outputfile = "HDR.out"
             if len(sys.argv) > 2: outputfile = sys.argv[2]
@@ -109,15 +119,15 @@ class Outputs:
                 f.write(" GEOPHIRES Build Date: 2022-06-30\n")
                 f.write(" Simulation Date: "+ datetime.datetime.now().strftime("%Y-%m-%d\n"))
                 f.write(" Simulation Time:  "+ datetime.datetime.now().strftime("%H:%M\n"))
-                f.write(" Calculation Time: "+"{0:10.3f}".format((time.time()-model.tic)) +" sec\n")
+                f.write(" Calculation Time: "+"{0:10.3f}".format((time.time()-model.tic)) + " sec\n")
 
                 f.write(NL)
                 f.write('                           ***SUMMARY OF RESULTS***\n')
                 f.write(NL)
                 f.write("      End-Use Option: " + str(model.surfaceplant.enduseoption.value.value) + NL)
-                if model.surfaceplant.enduseoption.value != EndUseOptions.HEAT:    #there is an electricity component
+                if model.surfaceplant.enduseoption.value != EndUseOptions.HEAT:    # there is an electricity component
                     f.write(f"      Average Net Electricity Production:               {np.average(model.surfaceplant.NetElectricityProduced.value):10.2f} " + model.surfaceplant.NetElectricityProduced.CurrentUnits.value + NL)
-                if model.surfaceplant.enduseoption.value != EndUseOptions.ELECTRICITY:    #there is a direct-use component
+                if model.surfaceplant.enduseoption.value != EndUseOptions.ELECTRICITY:    # there is a direct-use component
                     f.write(f"      Average Direct-Use Heat Production:               {np.average(model.surfaceplant.HeatProduced.value):10.2f} "+ model.surfaceplant.HeatProduced.CurrentUnits.value + NL)
 
                 if model.surfaceplant.enduseoption.value in [EndUseOptions.ELECTRICITY, EndUseOptions.COGENERATION_TOPPING_EXTRA_HEAT, EndUseOptions.COGENERATION_BOTTOMING_EXTRA_HEAT,  EndUseOptions.COGENERATION_PARALLEL_EXTRA_HEAT]:    #levelized cost expressed as LCOE
@@ -153,6 +163,10 @@ class Outputs:
                 f.write(f"      Accrued financing during construction:            {model.economics.inflrateconstruction.value*100:10.2f} " + model.economics.inflrateconstruction.CurrentUnits.value + NL)
                 f.write(f"      Project lifetime:                              {model.surfaceplant.plantlifetime.value:10.0f} " + model.surfaceplant.plantlifetime.CurrentUnits.value + NL)
                 f.write(f"      Capacity factor:                                 {model.surfaceplant.utilfactor.value*100:10.1f} %" + NL)
+                f.write(f"      Project NPV:                                     {model.economics.ProjectNPV.value:10.2f} " + model.economics.ProjectNPV.PreferredUnits.value + NL)
+                f.write(f"      Project IRR:                                     {model.economics.ProjectIRR.value:10.2f} " + model.economics.ProjectIRR.PreferredUnits.value + NL)
+                f.write(f"      Project VIR=PI=PIR:                              {model.economics.ProjectVIR.value:10.2f}" + NL)
+                f.write(f"      Project MOIC:                                    {model.economics.ProjectMOIC.value:10.2f}" + NL)
 
                 f.write(NL)
                 f.write('                          ***ENGINEERING PARAMETERS***\n')
@@ -418,9 +432,10 @@ class Outputs:
                                                                                                                                                 (model.reserv.InitialReservoirHeatContent.value-model.surfaceplant.RemainingReservoirHeatContent.value[i])*100/model.reserv.InitialReservoirHeatContent.value)+NL)
                 f.write(NL)
 
-            #MIR MIR if model.wellbores.HasHorizontalSection.value: model.cloutputs.PrintOutputs(model)
+            # MIR MIR if model.wellbores.HasHorizontalSection.value: model.cloutputs.PrintOutputs(model)
             if model.economics.DoAddOnCalculations.value: model.addoutputs.PrintOutputs(model)
             if model.economics.DoCCUSCalculations.value: model.ccusoutputs.PrintOutputs(model)
+            if model.economics.DoSDACGTCalculations.value: model.sdacgtoutputs.PrintOutputs(model)
         except BaseException as ex:
             tb = sys.exc_info()[2]
             print (str(ex))
