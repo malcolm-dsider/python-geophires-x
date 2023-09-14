@@ -1,18 +1,17 @@
 #! python
 # -*- coding: utf-8 -*-
+
 """
+Heat in Place calculation: Muffler, P., and Raffaele Cataldi.
+"Methods for regional assessment of geothermal resources."
+Geothermics 7.2-4 (1978): 53-89.
+and: Garg, S.K. and J. Combs. 2011.  A Reexamination of the USGS Volumetric "Heat in Place" Method.
+Stanford University, 36th Workshop on Geothermal Reservoir Engineering; SGP-TR-191, 5 pp.
+build date: September 2023
 Created on Monday Nov 28 08:54 2022
 
 @author: Malcolm Ross V1
 """
-
-# Heat in Place calculation: Muffler, P., and Raffaele Cataldi.
-# "Methods for regional assessment of geothermal resources."
-# Geothermics 7.2-4 (1978): 53-89.
-# and: Garg, S.K. and J. Combs. 2011.  A Reexamination of the USGS Volumetric "Heat in Place" Method.
-# Stanford University, 36th Workshop on Geothermal Reservoir Engineering; SGP-TR-191, 5 pp.
-# build date: December 2022
-# github address: https://github.com/malcolm-dsider/GEOPHIRES-X
 
 import os
 import sys
@@ -28,8 +27,17 @@ from geophires_x.Units import *
 NL = "\n"
 
 
-# user-defined functions
+# user-defined static functions
 def DensityWater(Twater: float) -> float:
+    """
+    the DensityWater function is used to calculate the density of water as a function of temperature
+
+    Args:
+    Twater: the temperature of water in degrees C
+
+    Returns:
+         density of water in kg/m3
+    """
     T = Twater + 273.15
     rhowater = (.7983223 + (
             1.50896E-3 - 2.9104E-6 * T) * T) * 1E3  # water density correlation as used in Geophires v1.2 [kg/m3]
@@ -37,12 +45,28 @@ def DensityWater(Twater: float) -> float:
 
 
 def ViscosityWater(Twater: float) -> float:
+    """
+    the ViscosityWater function is used to calculate the viscosity of water as a function of temperature
+    Args:
+        Twater: the temperature of water in degrees C
+
+    Returns:
+        Viscosity of water in Ns/m2
+    """
     # accurate to within 2.5% from 0 to 370 degrees C [Ns/m2]
     muwater = 2.414E-5 * np.power(10, 247.8 / (Twater + 273.15 - 140))
     return muwater
 
 
 def HeatCapacityWater(Twater) -> float:
+    """
+    the HeatCapacityWater function is used to calculate the specific heat capacity of water as a function of temperature
+    Args:
+        Twater: the temperature of water in degrees C
+
+    Returns:
+        The HeatCapacityWater function as a function of temperature in J/kg-K
+    """
     Twater = (Twater + 273.15) / 1000
     A = -203.6060
     B = 1523.290
@@ -55,6 +79,15 @@ def HeatCapacityWater(Twater) -> float:
 
 
 def RecoverableHeat(DefaultRecoverableHeat, Twater) -> float:
+    """
+    the RecoverableHeat function is used to calculate the recoverable heat fraction as a function of temperature
+    Args:
+        DefaultRecoverableHeat: The default recoverable heat fraction
+        Twater: the temperature of water in degrees C
+
+    Returns:
+        the recoverable heat fraction as a function of temperature
+    """
     # return the user parameter if it isn't -1
     if DefaultRecoverableHeat != -1:
         return DefaultRecoverableHeat
@@ -67,6 +100,13 @@ def RecoverableHeat(DefaultRecoverableHeat, Twater) -> float:
 
 
 def VaporPressureWater(Twater) -> float:
+    """
+    the VaporPressureWater function is used to calculate the vapor pressure of water as a function of temperature
+    Args:
+        Twater: the temperature of water in degrees C
+
+    Returns: the vapor pressure of water as a function of temperature in kPa
+    """
     if Twater < 100:
         A = 8.07131
         B = 1730.63
@@ -92,21 +132,40 @@ EnthalpyH20 = [0.000612, 42.021, 83.914, 104.83, 125.73, 167.53, 209.34, 251.18,
 UtilEff = [0.0, 0.0, 0.0, 0.0, 0.0057, 0.0337, 0.0617, 0.0897, 0.1177, 0.13, 0.16, 0.19, 0.22, 0.26, 0.29, 0.32,
            0.35, 0.38, 0.40, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4]
 
-# define 3 lookup functions using polynomial order 3 functions that vary as a function of the reservoir
-# temperature in deg-c
-
 
 def EntropyH20_func(x: float) -> float:
+    """
+    the EntropyH20_func function is used to calculate the entropy of water as a function of temperature
+    Args:
+        x: the temperature of water in degrees C
+
+    Returns:
+        the entropy of water as a function of temperature in kJ/kg-K
+    """
     y = np.interp(x, T, EntropyH20)
     return y
 
 
 def EnthalpyH20_func(x: float) -> float:
+    """
+    the EnthalpyH20_func function is used to calculate the enthalpy of water as a function of temperature
+    Args:
+        x: the temperature of water in degrees C
+
+    Returns: the enthalpy of water as a function of temperature in kJ/kg
+    """
     y = np.interp(x, T, EnthalpyH20)
     return y
 
 
 def UtilEff_func(x: float) -> float:
+    """
+    the UtilEff_func function is used to calculate the utilization efficiency of the system as a function of temperature
+    Args:
+        x: the temperature of water in degrees C
+
+    Returns: the utilization efficiency of the system as a function of temperature
+    """
     y = np.interp(x, T, UtilEff)
     return y
 
@@ -359,63 +418,54 @@ class HIP_RA:
         # Outputs
         self.V = self.OutputParameterDict[self.V.Name] = OutputParameter(
             Name="Reservoir Volume",
-            value=-999.9,
             UnitType=Units.VOLUME,
             PreferredUnits=VolumeUnit.KILOMETERS3,
             CurrentUnits=VolumeUnit.KILOMETERS3
         )
         self.qR = self.OutputParameterDict[self.qR.Name] = OutputParameter(
             Name="Stored Heat",
-            value=-999.9,
             UnitType=Units.HEAT,
             PreferredUnits=HeatUnit.KJ,
             CurrentUnits=HeatUnit.KJ
         )
         self.mWH = self.OutputParameterDict[self.mWH.Name] = OutputParameter(
             Name="Fluid Produced",
-            value=-999.9,
             UnitType=Units.MASS,
             PreferredUnits=MassUnit.KILOGRAM,
             CurrentUnits=MassUnit.KILOGRAM
         )
         self.e = self.OutputParameterDict[self.e.Name] = OutputParameter(
             Name="Enthalpy",
-            value=-999.9,
             UnitType=Units.ENTHALPY,
             PreferredUnits=EnthalpyUnit.KJPERKG,
             CurrentUnits=EnthalpyUnit.KJPERKG
         )
         self.qWH = self.OutputParameterDict[self.qWH.Name] = OutputParameter(
             Name="Wellhead Heat",
-            value=-999.9,
             UnitType=Units.HEAT,
             PreferredUnits=HeatUnit.KJ,
             CurrentUnits=HeatUnit.KJ
         )
         self.Rg = self.OutputParameterDict[self.Rg.Name] = OutputParameter(
             Name="Recovery Factor",
-            value=-999.9,
             UnitType=Units.PERCENT,
             PreferredUnits=PercentUnit.PERCENT,
             CurrentUnits=PercentUnit.PERCENT
         )
         self.WA = self.OutputParameterDict[self.WA.Name] = OutputParameter(
             Name="Available Heat",
-            value=-999.9,
             UnitType=Units.HEAT,
             PreferredUnits=HeatUnit.KJ,
             CurrentUnits=HeatUnit.KJ
         )
         self.WE = self.OutputParameterDict[self.WE.Name] = OutputParameter(
             Name="Producible Heat",
-            value=-999.9,
             UnitType=Units.HEAT,
             PreferredUnits=HeatUnit.KJ,
             CurrentUnits=HeatUnit.KJ
         )
         self.We = self.OutputParameterDict[self.We.Name] = OutputParameter(
             Name="Producible Electricity",
-            value=-999.9,
             UnitType=Units.ENERGYCOST,
             PreferredUnits=EnergyUnit.MWH,
             CurrentUnits=EnergyUnit.MWH
