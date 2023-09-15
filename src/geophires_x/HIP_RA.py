@@ -24,7 +24,7 @@ from geophires_x.Parameter import intParameter, floatParameter, OutputParameter,
     ConvertOutputUnits, LookupUnits
 from geophires_x.Units import *
 
-NL = "\n"
+NL= os.linesep
 
 
 # user-defined static functions
@@ -175,7 +175,7 @@ class HIP_RA:
     HIP_RA is the container class of the HIP_RA application, giving access to everything else, including the logger
     """
 
-    def __init__(self):
+    def __init__(self, enable_geophires_logging_config=True):
         """
         The __init__ function is called automatically every time the class is being used to create a new object.
         The self parameter is a Python convention. It must be included in each function definition and points to the
@@ -184,16 +184,19 @@ class HIP_RA:
         :return: Nothing
         :doc-author: Malcolm Ross
         """
-
-        # set up logging.
+        # get logging started
         self.logger = logging.getLogger('root')
-        self.logger.info("Init " + str(__name__))
-        self.InputParameters = {}  # dictionary to hold all the input parameter the user wants to change
+
+        if enable_geophires_logging_config:
+            logging.config.fileConfig('logging.conf')
+            self.logger.setLevel(logging.INFO)
+
+        self.logger.info(f'Init {str(__class__)}: {sys._getframe().f_code.co_name}')
 
         # Initiate the elements of the Model
         # Set up all the Parameters that will be predefined by this class using the different types of parameter
         # classes.  Setting up includes giving it a name, a default value, The Unit Type (length, volume,
-        # temperature, etc) and Unit Name of that value, sets it as required (or not), sets allowable range,
+        # temperature, etc.) and Unit Name of that value, sets it as required (or not), sets allowable range,
         # the error message if that range is exceeded, the ToolTip Text, and the name of teh class that created it.
         # This includes setting up temporary variables that will be available to all the class but noy read in by user,
         # or used for Output
@@ -203,7 +206,8 @@ class HIP_RA:
         # "OutputParameter" Objects.  This will allow us later to access them in a user interface and get that list,
         # along with unit type, preferred units, etc.
         self.ParameterDict = {}
-        self.OutputParameterDict = {}
+        self.OutputParameterDict = {}        # declare some dictionaries
+        self.InputParameters = {}  # dictionary to hold all the input parameter the user wants to change
 
         # inputs
         self.ReservoirTemperature = self.ParameterDict[self.ReservoirTemperature.Name] = floatParameter(
@@ -466,9 +470,9 @@ class HIP_RA:
         )
         self.We = self.OutputParameterDict[self.We.Name] = OutputParameter(
             Name="Producible Electricity",
-            UnitType=Units.ENERGYCOST,
-            PreferredUnits=EnergyUnit.MWH,
-            CurrentUnits=EnergyUnit.MWH
+            UnitType=Units.POWER,
+            PreferredUnits=PowerUnit.MW,
+            CurrentUnits=PowerUnit.MW
         )
 
         self.logger.info("Complete " + str(__class__) + ": " + sys._getframe().f_code.co_name)
@@ -490,6 +494,7 @@ class HIP_RA:
         # This should give us a dictionary with all the parameters the user wants to set.  Should be only those value
         # that they want to change from the default.
         # we do this as soon as possible because what we instantiate may depend on settings in this file
+
         read_input_file(self.InputParameters, logger=self.logger)
 
         # Deal with all the parameter values that the user has provided.  They should really only provide values
@@ -580,7 +585,7 @@ class HIP_RA:
         self.Rg.value = self.qWH.value / self.qR.value
         self.WA.value = self.mWH.value * self.e.value * self.Rg.value * RecoverableHeat(self.RecoverableHeat.value, self.ReservoirTemperature.value)
         self.WE.value = self.WA.value * UtilEff_func(self.ReservoirTemperature.value)
-        self.We.value = (((self.WE.value * 0.27777778) / (8760 * self.ReservoirLifeCycle.value)) / 1_000_000)
+        self.We.value = (self.WE.value/3_600_000) / 8_760     # convert Kilojoules of heat to MWe of electricity
 
         self.logger.info("complete " + str(__class__) + ": " + sys._getframe().f_code.co_name)
 
@@ -615,12 +620,12 @@ class HIP_RA:
         try:
             outputfile = "HIP.out"
             if len(sys.argv) > 2: outputfile = sys.argv[2]
-            with open(outputfile, 'w', encoding='UTF-8') as f:
-                f.write('                               *********************\n')
-                f.write('                               ***HIP CASE REPORT***\n')
-                f.write('                               *********************\n')
+            with open(outputfile,'w', encoding='UTF-8') as f:
+                f.write('                               *********************' + NL)
+                f.write('                               ***HIP CASE REPORT***' + NL)
+                f.write('                               *********************' + NL)
                 f.write(NL)
-                f.write('                           ***SUMMARY OF RESULTS***\n')
+                f.write('                           ***SUMMARY OF RESULTS***' + NL)
                 f.write(NL)
                 f.write(
                     f"      Reservoir Temperature:   {self.ReservoirTemperature.value:10.2f} " + self.ReservoirTemperature.CurrentUnits.value + NL)
@@ -654,16 +659,19 @@ class HIP_RA:
         return "HIP_RA"
 
 
-def main():
-    # set up logging.
-    logger = logging.getLogger('root')
-    logger.info("Init " + str(__name__))
-
+def main(enable_geophires_logging_config=True):
     # set the starting directory to be the directory that this file is in
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+    if enable_geophires_logging_config:
+        # set up logging.
+        logging.config.fileConfig('logging.conf')
+
+    logger = logging.getLogger('root')
+    logger.info("Init " + str(__name__))
+
     # initiate the HIP-RA parameters, setting them to their default values
-    model = HIP_RA()
+    model = HIP_RA(enable_geophires_logging_config=enable_geophires_logging_config)
 
     # read the parameters that apply to the model
     model.read_parameters()

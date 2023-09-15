@@ -2,6 +2,7 @@ import sys
 import logging
 import time
 import logging
+import logging.config
 
 from . import Parameter
 from .GeoPHIRESUtils import read_input_file

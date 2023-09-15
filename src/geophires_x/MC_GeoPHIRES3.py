@@ -1,14 +1,14 @@
 #! python
 # -*- coding: utf-8 -*-
 """
+Framework for running Monte Carlo simulations using GEOPHIRES v3.0 & HIP-RA 1.0
+build date: September 2023
+
 Created on Wed November  16 10:43:04 2017
 
 @author: Malcolm Ross V3
 """
 
-# Framework for running Monte Carlo simulations uding GEOPHIRES v3.0 & HIP-RA 1.0
-# build date: November 2022
-# github address: https://github.com/malcolm-dsider/GEOPHIRES-X
 
 import os
 import sys
@@ -24,6 +24,15 @@ import multiprocessing
 
 
 def CheckAndReplaceMean(input_value, args) -> list:
+    """
+    CheckAndReplaceMean - check to see if the user has requested that a value be replaced by a mean value by specifying
+    a value as "#"
+    Args:
+        input_value: the value to check
+        args: the list of arguments passed in from the command line
+
+    Returns: a list of values that have been checked and replaced if necessary
+    """
     i = 0
     for inputx in input_value:
         if "#" in inputx:
@@ -41,27 +50,27 @@ def CheckAndReplaceMean(input_value, args) -> list:
         i = i + 1
     return input_value
 
-
-def WorkPackage(Job_ID, Inputs, Outputs, args, Outputfile, working_dir):
-    # get random values for each of the INPUTS based on the distributions and boundary values
+def WorkPackage(Job_ID, Inputs, Outputs, args, Outputfile, working_dir, PythonPath: str):
+    tmpoutputfile = tmpfilename = ""
+#get random values for each of the INPUTS based on the distributions and boundary values
     rando = 0.0
     s = ""
     for input_value in Inputs:
         if input_value[1].strip().startswith('normal'):
             rando = np.random.normal(float(input_value[2]), float(input_value[3]))
-            s = s + input_value[0] + ", " + str(rando) + "\r\n"
+            s = s + input_value[0] + ", " + str(rando) + os.linesep
         elif input_value[1].strip().startswith('uniform'):
             rando = np.random.uniform(float(input_value[2]), float(input_value[3]))
-            s = s + input_value[0] + ", " + str(rando) + "\r\n"
+            s = s + input_value[0] + ", " + str(rando) + os.linesep
         elif input_value[1].strip().startswith('triangular'):
             rando = np.random.triangular(float(input_value[2]), float(input_value[3]), float(input_value[4]))
-            s = s + input_value[0] + ", " + str(rando) + "\r\n"
+            s = s + input_value[0] + ", " + str(rando) + os.linesep
         if input_value[1].strip().startswith('lognormal'):
             rando = np.random.lognormal(float(input_value[2]), float(input_value[3]))
-            s = s + input_value[0] + ", " + str(rando) + "\r\n"
+            s = s + input_value[0] + ", " + str(rando) + os.linesep
         if input_value[1].strip().startswith('binomial'):
             rando = np.random.binomial(float(input_value[2]), float(input_value[3]))
-            s = s + input_value[0] + ", " + str(rando) + "\r\n"
+            s = s + input_value[0] + ", " + str(rando) + os.linesep
 
     # make up a temporary file name that will be shared among files for this iteration
     tmpfilename = working_dir + str(uuid.uuid4()) + ".txt"
@@ -75,14 +84,13 @@ def WorkPackage(Job_ID, Inputs, Outputs, args, Outputfile, working_dir):
     with open(tmpfilename, "a") as f:
         f.write(s)
 
-    # start GeoPHIRES/HIP-RA with that input file. Capture the output into a filename that is the
-    # same as the input file but has the suffix "_result.txt".
-    sprocess = subprocess.Popen(["python", args.Code_File, tmpfilename, tmpoutputfile], stdout=subprocess.DEVNULL)
+#start GeoPHIRES/HIP-RA with that input file. Capture the output into a filename that is the same as the input file but has the suffix "_result.txt".
+    sprocess = subprocess.Popen([PythonPath, args.Code_File, tmpfilename, tmpoutputfile], stdout=subprocess.DEVNULL)
     sprocess.wait()
 
     # look thru "_result.txt" file for the OUTPUT variables that the user asked for.
     # For each of them, write them as a column in results file
-    s = ""
+    s1 = ""
     s2 = {}
     result_s = ""
     localOutputs = Outputs
@@ -90,14 +98,15 @@ def WorkPackage(Job_ID, Inputs, Outputs, args, Outputfile, working_dir):
     # make sure a key file exists. If not, exit
     if not os.path.exists(tmpoutputfile):
         print("Timed out waiting for: " + tmpoutputfile)
+        logger.warning("Timed out waiting for: " + tmpoutputfile)
         exit(-33)
 
     with open(tmpoutputfile, "r") as f:
-        s = f.readline()
-        i = 0
-        while s:
+        s1=f.readline()
+        i=0
+        while s1:
             for out in localOutputs:
-                if out in s:
+                if out in s1:
                     localOutputs.remove(out)
                     s2 = s.split(":")
                     s2 = s2[1].strip()
@@ -105,10 +114,12 @@ def WorkPackage(Job_ID, Inputs, Outputs, args, Outputfile, working_dir):
                     s2 = s2[0]
                     result_s = result_s + s2 + ", "
                     i = i + 1
-                    if i < (len(Outputs) - 1): f.seek(
-                        0)  # go back to the beginning of the file in case the outputs that the user specified aer not in the order that they appear in the file.
+                    if i < (len(Outputs) - 1):
+                        # go back to the beginning of the file in case the outputs that the user specified are not
+                        # in the order that they appear in the file.
+                        f.seek(0)
                     break
-            s = f.readline()
+            s1 = f.readline()
 
     # delete  temporary files
     os.remove(tmpfilename)
@@ -117,14 +128,18 @@ def WorkPackage(Job_ID, Inputs, Outputs, args, Outputfile, working_dir):
     # write out the results
     result_s = result_s.strip(" ")  # get rid of last space
     result_s = result_s.strip(",")  # et rid of last comma
-    result_s = result_s + "\n"
+    result_s = result_s + os.linesep
     with open(Outputfile, "a") as f:
         f.write(result_s)
 
 
-def main():
+def main(enable_geophires_logging_config=True):
+    # set the starting directory to be the directory that this file is in
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     # set up logging.
-    logging.config.fileConfig('logging.conf')
+    if enable_geophires_logging_config:
+        # set up logging.
+        logging.config.fileConfig('logging.conf')
     logger = logging.getLogger('root')
     logger.info("Init " + str(__name__))
     # keep track of execution time
@@ -133,7 +148,7 @@ def main():
     # set the starting directory to be the directory that this file is in
     working_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(working_dir)
-    working_dir = working_dir + "\\"
+    working_dir = working_dir + os.sep
 
     # from the command line, read what we need to know:
     #    0) Code_File: Python code to run
@@ -155,6 +170,8 @@ def main():
     #         d) the name of the output file (it will contain one column for each of the output variables to track),
     #         in the form:
     #                MC_OUTPUT_FILE, "D:\Work\GEOPHIRES3-master\MC_Result.txt"
+    #         d) the path to the python executable, it it is not already linked to "python", in the form:
+    #                PYTHON_PATH, /user/local/bin/python3
 
     # get the values off the command line
     parser = argparse.ArgumentParser()
@@ -177,6 +194,7 @@ def main():
     Outputs = []
     Iterations = 0
     Outputfile = ""
+    PythonPath = "python"
     for line in flist:
         clean = line.strip()
         pair = clean.split(",")
@@ -189,18 +207,26 @@ def main():
             Iterations = int(pair[1])
         elif pair[0].startswith("MC_OUTPUT_FILE"):
             Outputfile = pair[1]
+        elif pair[0].startswith("PYTHON_PATH"):
+            PythonPath = pair[1]
 
     # check to see if there is a "#" in an input, if so, use the results file to replace it with the value
     for input_value in Inputs:
         input_value = CheckAndReplaceMean(input_value, args)
 
-    # create the file output_file. Put headers in it for each of the OUTPUT variables
+    # create the file output_file. Put headers in it for each of the INPUT and OUTPUT variables
+    # - these form the column headings when importing into Excel
+    # - we include the INPUT and OUTPUT variables in the output file so that we can track the results and tell which
+    # combination of variables produced the interesting values (like lowest or highest, or mean)
     # start by creating the string we will write as header
     s = ""
-    for output in Outputs: s = s + output + ", "
+    for input in Inputs:
+        s = s + input[0] + ", "
+    for output in Outputs:
+        s = s + output + ", "
     s = "".join(s.rsplit(" ", 1))  # get rid of last space
     s = "".join(s.rsplit(",", 1))  # get rid of last comma
-    s = s + "\n"
+    s = s + os.linesep
     with open(Outputfile, "w") as f:
         f.write(s)
 
@@ -209,8 +235,7 @@ def main():
     print("Starting Iteration:", end='')
     for i in range(1, Iterations + 1):
         print(str(i), end=',')
-        proc = multiprocessing.Process(target=WorkPackage,
-                                       args=(Job_ID, Inputs, Outputs, args, Outputfile, working_dir))
+        proc = multiprocessing.Process(target=WorkPackage, args=(Job_ID, Inputs, Outputs, args, Outputfile, working_dir, PythonPath))
         procs.append(proc)
         proc.start()
 
@@ -218,7 +243,8 @@ def main():
     for proc in procs:
         proc.join()
 
-    print("\nDone with calculations! Summarizing...\n")
+    print (os.linesep + "Done with calculations! Summarizing..." + os.linesep)
+    logger.info("Done with calculations! Summarizing...")
 
     # read the results into an array
     actual_records_count = Iterations
@@ -232,12 +258,12 @@ def main():
         result_count = result_count + 1
         if "-9999.0" not in line and len(s) > 1:
             line = line.strip()
-            if len(line) > 0:
+            if len(line) > 3:
                 Results.append([float(y) for y in line.split(",")])
             else:
-                print("space found in line " + str(result_count))
+                logger.warn("space found in line " + str(result_count))
         else:
-            print("-9999.0 or space found in line " + str(result_count))
+            logger.warn("-9999.0 or space found in line " + str(result_count))
 
     actual_records_count = len(Results)
 
@@ -252,32 +278,37 @@ def main():
 
     # write them out
     with open(Outputfile, "a") as f:
-        i = 0
+        i=0
         if Iterations != actual_records_count:
-            f.write("\n\n" + str(actual_records_count) + " iterations finished successfully and were used to calculate the statistics\n\n")
+            f.write(os.linesep + os.linesep + str(actual_records_count) + " iterations finished successfully and were used to calculate the statistics" + os.linesep + os.linesep)
         for output in Outputs:
-            f.write(output + ":" + "\n")
-            f.write(f"     minimum: {mins[i]:,.2f}\n")
-            f.write(f"     maximum: {maxs[i]:,.2f}\n")
-            f.write(f"     median: {medians[i]:,.2f}\n")
-            f.write(f"     average: {averages[i]:,.2f}\n")
-            f.write(f"     mean: {means[i]:,.2f}\n")
-            f.write(f"     standard deviation: {std[i]:,.2f}\n")
-            f.write(f"     variance: {var[i]:,.2f}\n")
+            f.write (output + ":" + os.linesep)
+            f.write (f"     minimum: {mins[i]:,.2f}" + os.linesep)
+            f.write (f"     maximum: {maxs[i]:,.2f}" + os.linesep)
+            f.write (f"     median: {medians[i]:,.2f}" + os.linesep)
+            f.write (f"     average: {averages[i]:,.2f}" + os.linesep)
+            f.write (f"     mean: {means[i]:,.2f}" + os.linesep)
+            f.write (f"     standard deviation: {std[i]:,.2f}" + os.linesep)
+            f.write (f"     variance: {var[i]:,.2f}" + os.linesep)
             i = i + 1
 
-    print(" Calculation Time: " + "{0:10.3f}".format((time.time() - tic)) + " sec\n")
-    print(" Calculation Time per iteration: " + "{0:10.3f}".format((time.time() - tic) / actual_records_count) + " sec\n")
+    print (" Calculation Time: "+"{0:10.3f}".format((time.time()-tic)) + " sec" + os.linesep)
+    logger.info(" Calculation Time: "+"{0:10.3f}".format((time.time()-tic)) + " sec" + os.linesep)
+    print (" Calculation Time per iteration: "+"{0:10.3f}".format(((time.time()-tic))/actual_records_count) +" sec" + os.linesep)
+    logger.info(" Calculation Time per iteration: "+"{0:10.3f}".format(((time.time()-tic))/actual_records_count) +" sec" + os.linesep)
     if Iterations != actual_records_count:
-        print("\n\nNOTE:" + str(actual_records_count) + " iterations finished successfully and were used to calculate the statistics.\n\n")
+        print(os.linesep + os.linesep + "NOTE:" + str(actual_records_count) +
+              " iterations finished successfully and were used to calculate the statistics." + os.linesep + os.linesep)
+        logger.warning(os.linesep + os.linesep + "NOTE:" + str(actual_records_count) +
+              " iterations finished successfully and were used to calculate the statistics." + os.linesep + os.linesep)
 
     logger.info("Complete " + str(__name__) + ": " + sys._getframe().f_code.co_name)
 
 
 if __name__ == "__main__":
     # set up logging.
-    logging.config.fileConfig('logging.conf')
     logger = logging.getLogger('root')
     logger.info("Init " + str(__name__))
+
 
     main()
